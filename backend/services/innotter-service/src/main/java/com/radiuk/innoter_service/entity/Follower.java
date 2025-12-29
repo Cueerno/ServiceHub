@@ -19,6 +19,6 @@ public class Follower {
     @MapsId("pageId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(nullable = false)
-    private Page page;
+    private PageEntity page;
 
 }

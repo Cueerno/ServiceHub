@@ -41,7 +41,7 @@ public class Post {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "page_id")
-    private Page page;
+    private PageEntity page;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
