@@ -54,8 +54,8 @@ public class User {
     @JoinColumn(name = "group_id")
     private Group group;
 
-    @Column(name = "is_blocked", nullable = false)
-    private Boolean isBlocked = false;
+    @Column(nullable = false)
+    private boolean isBlocked;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false)
