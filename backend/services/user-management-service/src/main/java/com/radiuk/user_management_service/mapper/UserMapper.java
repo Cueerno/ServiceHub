@@ -2,6 +2,7 @@ package com.radiuk.user_management_service.mapper;
 
 import com.radiuk.user_management_service.dto.UserRegistrationDto;
 import com.radiuk.user_management_service.dto.UserResponseDto;
+import com.radiuk.user_management_service.dto.UserUpdateDto;
 import com.radiuk.user_management_service.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -14,5 +15,5 @@ public interface UserMapper {
 
     User fromRegistrationDto(UserRegistrationDto userRegistrationDto);
 
-    void updateFromDto(UserRegistrationDto dto, @MappingTarget User entity);
+    void updateFromDto(UserUpdateDto dto, @MappingTarget User entity);
 }
