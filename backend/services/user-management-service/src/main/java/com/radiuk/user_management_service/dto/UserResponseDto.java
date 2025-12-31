@@ -4,9 +4,9 @@ import java.time.Instant;
 
 public record UserResponseDto(
 
+        String username,
         String firstname,
         String lastname,
-        String password,
         String phoneNumber,
         String email,
         Instant createdAt
