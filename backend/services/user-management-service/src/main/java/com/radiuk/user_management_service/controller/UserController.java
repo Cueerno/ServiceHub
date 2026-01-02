@@ -23,9 +23,9 @@ public class UserController {
     public ResponseEntity<List<UserResponseDto>> getUsersBy(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "30") int limit,
-            @RequestParam(required = false) String filterByName,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "asc") String orderBy,
+            @RequestParam(name = "filter_by_name", required = false) String filterByName,
+            @RequestParam(name = "sort_by", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "order_by", defaultValue = "asc") String orderBy,
             @AuthenticationPrincipal Jwt jwt
     ) {
         return ResponseEntity.ok(userService.getUsersBy(page, limit, filterByName, sortBy, orderBy, jwt));
