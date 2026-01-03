@@ -48,6 +48,11 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers(
+                                "/api/v1/users/{id}"
+
+                        ).hasAnyRole("ADMIN", "MODERATOR")
+
+                        .requestMatchers(
                                 "/api/v1/users/**"
 
                         ).authenticated()
