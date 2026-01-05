@@ -39,18 +39,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
 
                         .requestMatchers(
-                                "/api/v1/auth/logout",
-                                "/api/v1/auth/reset-password"
-                        ).authenticated()
-
-                        .requestMatchers(
-                                "/api/v1/auth/**"
+                                "/api/v1/auth/signup",
+                                "/api/v1/auth/login"
                         ).permitAll()
 
-                        .requestMatchers(
-                                "/api/v1/users/{id}"
+                                .requestMatchers(
+                                        "/api/v1/auth/**"
+                                ).authenticated()
 
-                        ).hasAnyRole("ADMIN", "MODERATOR")
+//                        .requestMatchers(
+//                                "/api/v1/users/{id}"
+//
+//                        ).hasAnyRole("ADMIN", "MODERATOR")
 
                         .requestMatchers(
                                 "/api/v1/users/**"
