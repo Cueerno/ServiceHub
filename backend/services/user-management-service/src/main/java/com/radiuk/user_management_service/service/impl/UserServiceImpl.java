@@ -28,16 +28,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> getUsersBy(int page, int limit, String filterByName, String sortBy, String orderBy, Jwt jwt) {
-        Sort.Direction direction = orderBy.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(direction, sortBy));
+        Pageable pageable = buildPageable(page, limit, sortBy, orderBy);
 
-        List<User> users;
-
-        if (filterByName == null || filterByName.isBlank()) {
-            users = userRepository.findAll(pageable).getContent();
-        }  else {
-            users = userRepository.findByFirstnameContainingIgnoreCase(pageable, filterByName).getContent();
-        }
+        List<User> users = (filterByName == null || filterByName.isBlank())
+                ? userRepository.findAll(pageable).getContent()
+                : userRepository.findByFirstnameContainingIgnoreCase(pageable, filterByName).getContent();
 
         return users.stream()
                 .map(userMapper::toUserResponseDto).toList();
@@ -45,17 +40,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserByToken(Jwt jwt) {
-        return userMapper.toUserResponseDto(getUserByIdOrThrow(Long.valueOf(jwt.getSubject())));
+        return userMapper.toUserResponseDto(getUserByIdOrThrow(getUserIdFromToken(jwt)));
     }
 
     @Override
     public UserResponseDto getUserById(Jwt jwt, Long userId) {
-        return userMapper.toUserResponseDto(getUserByIdOrThrow(userId));
+        User user = getUserByIdOrThrow(userId);
+        return userMapper.toUserResponseDto(user);
     }
 
     @Override
     public UserResponseDto updateUserByToken(UserUpdateDto dto, Jwt jwt) {
-        User user = getUserByIdOrThrow(Long.valueOf(jwt.getSubject()));
+        User user = getUserByIdOrThrow(getUserIdFromToken(jwt));
         return userMapper.toUserResponseDto(updateUser(dto, user));
     }
 
@@ -67,15 +63,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUserByToken(Jwt jwt) {
-        userRepository.deleteById(getUserByIdOrThrow(Long.valueOf(jwt.getSubject())).getId());
+        userRepository.deleteById(getUserIdFromToken(jwt));
     }
 
     @Override
     public void deleteUserById(Jwt jwt, Long userId) {
-        userRepository.deleteById(getUserByIdOrThrow(userId).getId());
+        User user = getUserByIdOrThrow(userId);
+        userRepository.deleteById(user.getId());
     }
 
-    public User getUserByIdOrThrow(Long userId) {
+    private Long getUserIdFromToken(Jwt jwt) {
+        return Long.valueOf(jwt.getSubject());
+    }
+
+
+    private Pageable buildPageable(int page, int limit, String sortBy, String orderBy) {
+        Sort.Direction direction = orderBy.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        return PageRequest.of(page - 1, limit, Sort.by(direction, sortBy));
+    }
+
+    private User getUserByIdOrThrow(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User with id %d not found", userId)));
     }
