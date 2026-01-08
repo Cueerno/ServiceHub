@@ -5,6 +5,7 @@ import com.radiuk.user_management_service.entity.User;
 import com.radiuk.user_management_service.repository.RefreshTokenRepository;
 import com.radiuk.user_management_service.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
@@ -25,6 +27,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public String createRefreshToken(User user, String jti) {
+        log.debug("Creating refresh token for user with email {}", user.getEmail());
+
         String rawToken = UUID.randomUUID().toString();
 
         RefreshToken refreshToken = new RefreshToken();
@@ -35,6 +39,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         refreshTokenRepository.save(refreshToken);
 
+        log.info("Created refresh token for user with email {}", user.getEmail());
         return rawToken;
     }
 
@@ -45,6 +50,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 .findFirst()
                 .orElseThrow(() -> new JwtException("Invalid refresh token"));
 
+        log.debug("Validating refresh token for user with email{}", token.getUser().getEmail());
 
         if (token.isRevoked()) {
             refreshTokenRepository.revokeAllByUser(token.getUser());
@@ -57,16 +63,19 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         token.setRevoked(true);
 
+        log.info("Refresh token revoked for user with email {}", token.getUser().getEmail());
         return token.getUser();
     }
 
     @Override
     public void revokeByJti(String jti) {
+        log.debug("Revoke refresh token for user {}", jti);
         refreshTokenRepository.revokeByJti(jti);
     }
 
     @Override
     public void revokeAll(User user) {
+        log.debug("Revoke all refresh tokens for user with email {}", user.getEmail());
         refreshTokenRepository.deleteAllByUser(user);
     }
 }

@@ -10,6 +10,7 @@ import com.radiuk.user_management_service.mapper.UserMapper;
 import com.radiuk.user_management_service.repository.UserRepository;
 import com.radiuk.user_management_service.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -30,12 +32,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> getUsersBy(int page, int limit, String filterByName, String sortBy, String orderBy, Jwt jwt) {
+        log.debug("Get users with page {} and limit {}, with filter by name {}, with sort by {} and order by {}", page, limit, filterByName, sortBy, orderBy);
+
         Pageable pageable = buildPageable(page, limit, sortBy, orderBy);
 
         List<User> users = (filterByName == null || filterByName.isBlank())
                 ? userRepository.findAll(pageable).getContent()
                 : userRepository.findByFirstnameContainingIgnoreCase(pageable, filterByName).getContent();
 
+        log.info("Found {} users", users.size());
         return users.stream()
                 .filter(u -> !isSelf(u, jwt))
                 .filter(u -> canAccessUser(u, jwt))
@@ -45,56 +50,104 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserByToken(Jwt jwt) {
+        log.debug("Get user with id {}", getUserIdFromToken(jwt));
         return userMapper.toUserResponseDto(getUserByIdOrThrow(getUserIdFromToken(jwt)));
     }
 
     @Override
     public UserResponseDto getUserById(Jwt jwt, Long userId) {
+        log.info("Get user by id: targetUserId={}, requesterId={}", userId, jwt.getSubject());
+
         User user = getUserByIdOrThrow(userId);
         checkAccess(user, jwt);
+
         return userMapper.toUserResponseDto(user);
     }
 
     @Override
     public UserResponseDto updateUserByToken(UserUpdateDto dto, Jwt jwt) {
+        log.info("Update user with id {}", getUserIdFromToken(jwt));
         User user = getUserByIdOrThrow(getUserIdFromToken(jwt));
         return userMapper.toUserResponseDto(updateUser(dto, user));
     }
 
     @Override
     public UserResponseDto updateUserById(UserUpdateDto dto, Jwt jwt, Long userId) {
+        log.info(
+                "Update user: targetUserId={}, requesterId={}, fields={}",
+                userId,
+                jwt.getSubject(),
+                dto
+        );
+
         User user = getUserByIdOrThrow(userId);
         checkAccess(user, jwt);
+
+        log.info("User updated successfully: userId={}", userId);
         return userMapper.toUserResponseDto(updateUser(dto, user));
     }
 
     @Override
     public void deleteUserByToken(Jwt jwt) {
+        log.info("Delete user with id {}", getUserIdFromToken(jwt));
         userRepository.deleteById(getUserIdFromToken(jwt));
     }
 
-    @Override
     public void deleteUserById(Jwt jwt, Long userId) {
+        log.warn(
+                "Delete user request: targetUserId={}, requesterId={}",
+                userId,
+                jwt.getSubject()
+        );
+
         User user = getUserByIdOrThrow(userId);
         checkAccess(user, jwt);
+
         userRepository.deleteById(user.getId());
+
+        log.warn("User deleted: userId={}", userId);
     }
+
 
     private void checkAccess(User user, Jwt jwt) {
         if (!canAccessUser(user, jwt)) {
+            log.warn(
+                    "Access denied: requesterId={}, targetUserId={}, roles={}",
+                    jwt.getSubject(),
+                    user.getId(),
+                    getUserRolesFromToken(jwt)
+            );
             throw new AccessDeniedException("Access denied");
         }
     }
 
     private boolean canAccessUser(User user, Jwt jwt) {
         if (isAdmin(jwt)) {
+            log.debug("Admin access granted: requesterId={}", jwt.getSubject());
             return true;
         }
 
         if (isModerator(jwt)) {
             Long groupId = jwt.getClaim("groupId");
-            return groupId != null && user.getGroup() != null && groupId.equals(user.getGroup().getId());
+            boolean allowed = groupId != null
+                    && user.getGroup() != null
+                    && groupId.equals(user.getGroup().getId());
+
+            log.debug(
+                    "Moderator access check: requesterId={}, targetUserId={}, allowed={}",
+                    jwt.getSubject(),
+                    user.getId(),
+                    allowed
+            );
+
+            return allowed;
         }
+
+        log.debug(
+                "Access denied by role: requesterId={}, roles={}",
+                jwt.getSubject(),
+                getUserRolesFromToken(jwt)
+        );
 
         return false;
     }
@@ -135,14 +188,28 @@ public class UserServiceImpl implements UserService {
     }
 
     private User updateUser(UserUpdateDto dto, User user) {
-        if (dto.email() != null && !dto.email().equals(user.getEmail()) && userRepository.existsByEmail(dto.email())) {
+
+        if (dto.email() != null && !dto.email().equals(user.getEmail())
+                && userRepository.existsByEmail(dto.email())) {
+
+            log.warn(
+                    "Failed to update user {}: email already exists",
+                    user.getId()
+            );
             throw new UserNotUpdatedException("User with this email already exists");
         }
 
-        if (dto.username() != null && !dto.username().equals(user.getUsername()) && userRepository.existsByUsername(dto.username())) {
+        if (dto.username() != null && !dto.username().equals(user.getUsername())
+                && userRepository.existsByUsername(dto.username())) {
+
+            log.warn(
+                    "Failed to update user {}: username already exists",
+                    user.getId()
+            );
             throw new UserNotUpdatedException("User with this username already exists");
         }
 
+        log.debug("Applying updates to user {}", user.getId());
         userMapper.updateFromDto(dto, user);
 
         return user;
