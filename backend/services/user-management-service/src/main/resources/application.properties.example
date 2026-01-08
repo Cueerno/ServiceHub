@@ -1,0 +1,22 @@
+spring.application.name=user-management-service
+
+server.port=8080
+
+# Data Source
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.url=jdbc:postgresql://localhost:5432/service_hub_db
+spring.datasource.username=
+spring.datasource.password=
+
+# Hibernate
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.show_sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.hibernate.ddl-auto=validate
+
+# JWT
+jwt.secret-base64=
+jwt.expiration=900
+jwt.refresh-expiration=604800
+
+spring.task.scheduling.pool.size=1
