@@ -4,6 +4,7 @@ import com.radiuk.innoter_service.dto.tag.TagRequestDto;
 import com.radiuk.innoter_service.dto.tag.TagResponseDto;
 import com.radiuk.innoter_service.service.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,6 @@ public class TagController {
 
     @PostMapping("")
     public ResponseEntity<TagResponseDto> create(@RequestBody TagRequestDto tagRequestDto) {
-        return ResponseEntity.ok(tagService.createTag(tagRequestDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(tagService.createTag(tagRequestDto));
     }
 }
