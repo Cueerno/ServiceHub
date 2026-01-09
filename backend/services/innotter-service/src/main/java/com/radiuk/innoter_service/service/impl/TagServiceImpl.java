@@ -3,6 +3,7 @@ package com.radiuk.innoter_service.service.impl;
 import com.radiuk.innoter_service.dto.tag.TagRequestDto;
 import com.radiuk.innoter_service.dto.tag.TagResponseDto;
 import com.radiuk.innoter_service.entity.Tag;
+import com.radiuk.innoter_service.exception.TagNotCreatedException;
 import com.radiuk.innoter_service.mapper.TagMapper;
 import com.radiuk.innoter_service.repository.TagRepository;
 import com.radiuk.innoter_service.service.TagService;
@@ -38,6 +39,10 @@ public class TagServiceImpl implements TagService {
     @Override
     public TagResponseDto createTag(TagRequestDto tagRequestDto) {
         Tag tag = tagMapper.fromRequestDto(tagRequestDto);
+
+        if (tagRepository.existsByName(tagRequestDto.name())) {
+            throw new TagNotCreatedException("Tag already exists");
+        }
 
         return tagMapper.toDto(tagRepository.save(tag));
     }

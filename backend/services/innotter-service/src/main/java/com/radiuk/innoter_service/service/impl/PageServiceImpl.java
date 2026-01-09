@@ -88,16 +88,26 @@ public class PageServiceImpl implements PageService {
 
     @Override
     public PageResponseDto createPage(PageRequestDto pageRequestDto, Long userId) {
+        if (pageRepository.existsByName(pageRequestDto.name())) {
+            throw new PageNotCreatedException(String.format("Page with name %s already exists", pageRequestDto.name()));
+        }
+
         PageEntity page = pageMapper.fromRequestDto(pageRequestDto);
 
         return pageMapper.toDto(pageRepository.save(page));
     }
 
     @Override
-    public PageResponseDto updatePage(PageRequestDto pageRequestDto, Long pageId, Long userId) {
+    public PageResponseDto updatePage(PageRequestDto dto, Long pageId, Long userId) {
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
-        pageMapper.updateFromDto(pageRequestDto, page);
+        String newPageName = dto.name();
+
+        if (newPageName != null && !newPageName.equals(page.getName()) && pageRepository.existsByName(dto.name())) {
+            throw new PageNotUpdatedException(String.format("Page with name %s already exists", newPageName));
+        }
+
+        pageMapper.updateFromDto(dto, page);
 
         return pageMapper.toDto(page);
     }
