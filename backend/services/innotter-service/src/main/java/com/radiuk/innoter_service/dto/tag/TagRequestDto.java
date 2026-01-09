@@ -1,4 +1,7 @@
 package com.radiuk.innoter_service.dto.tag;
 
-public record TagRequestDto() {
+public record TagRequestDto(
+
+        String name
+) {
 }
