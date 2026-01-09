@@ -7,6 +7,9 @@ import com.radiuk.innoter_service.mapper.TagMapper;
 import com.radiuk.innoter_service.repository.TagRepository;
 import com.radiuk.innoter_service.service.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,8 +22,17 @@ public class TagServiceImpl implements TagService {
     private final TagMapper tagMapper;
 
     @Override
-    public List<TagResponseDto> getTagsWithPaginationAndLimitAndFilter(Long page, Long limit, String filterByName) {
-        return List.of();
+    public List<TagResponseDto> getTagsWithPaginationAndLimitAndFilter(int page, int limit, String filterByName) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.ASC, "name"));
+
+        return (
+                (filterByName == null || filterByName.isBlank())
+                        ? tagRepository.findAll(pageable).getContent()
+                        : tagRepository.findByNameContainingIgnoreCase(pageable, filterByName).getContent()
+        )
+                .stream()
+                .map(tagMapper::toDto)
+                .toList();
     }
 
     @Override

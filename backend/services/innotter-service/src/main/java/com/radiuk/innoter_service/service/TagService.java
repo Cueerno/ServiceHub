@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface TagService {
 
-    List<TagResponseDto> getTagsWithPaginationAndLimitAndFilter(Long page, Long limit, String filterByName);
+    List<TagResponseDto> getTagsWithPaginationAndLimitAndFilter(int page, int limit, String filterByName);
 
     TagResponseDto createTag(TagRequestDto tagRequestDto);
 }

@@ -18,9 +18,9 @@ public class TagController {
 
     @GetMapping("")
     public ResponseEntity<List<TagResponseDto>> getPostByTags(
-            @RequestParam(defaultValue = "1") Long page,
-            @RequestParam(defaultValue = "30") Long limit,
-            @RequestParam(required = false) String filterByName
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "30") int limit,
+            @RequestParam(name = "filter_by_name", required = false) String filterByName
     ) {
         return ResponseEntity.ok(tagService.getTagsWithPaginationAndLimitAndFilter(page, limit, filterByName));
     }
