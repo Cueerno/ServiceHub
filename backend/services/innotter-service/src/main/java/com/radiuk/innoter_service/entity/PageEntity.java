@@ -35,7 +35,7 @@ public class PageEntity {
     private String imageUrl;
 
     @Column(nullable = false)
-    private Boolean isBlocked = false;
+    private boolean isBlocked;
 
     private Instant unblockDate;
 
@@ -47,7 +47,7 @@ public class PageEntity {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    private Long userId;
+    private Long creatorId;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "page_id")

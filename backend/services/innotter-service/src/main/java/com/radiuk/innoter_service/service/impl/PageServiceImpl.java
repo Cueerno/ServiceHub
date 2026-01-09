@@ -137,9 +137,7 @@ public class PageServiceImpl implements PageService {
     public PageResponseDto block(Long pageId, Long userId) {
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
-        page.setIsBlocked(true);
-
-        return pageMapper.toDto(page);
+        page.setBlocked(true);
     }
 
     @Override
