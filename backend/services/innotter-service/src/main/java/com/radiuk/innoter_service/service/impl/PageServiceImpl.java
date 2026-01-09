@@ -1,6 +1,5 @@
 package com.radiuk.innoter_service.service.impl;
 
-import com.radiuk.innoter_service.dto.follower.FollowerResponseDto;
 import com.radiuk.innoter_service.dto.page.PageRequestDto;
 import com.radiuk.innoter_service.dto.page.PageResponseDto;
 import com.radiuk.innoter_service.dto.post.PostResponseDto;
@@ -8,7 +7,8 @@ import com.radiuk.innoter_service.entity.Follower;
 import com.radiuk.innoter_service.entity.PageEntity;
 import com.radiuk.innoter_service.entity.Post;
 import com.radiuk.innoter_service.entity.embedded_id.FollowerId;
-import com.radiuk.innoter_service.mapper.FollowerMapper;
+import com.radiuk.innoter_service.exception.PageNotCreatedException;
+import com.radiuk.innoter_service.exception.PageNotUpdatedException;
 import com.radiuk.innoter_service.mapper.PageMapper;
 import com.radiuk.innoter_service.mapper.PostMapper;
 import com.radiuk.innoter_service.mapper.TagMapper;
@@ -40,7 +40,6 @@ public class PageServiceImpl implements PageService {
     private final FollowerRepository followerRepository;
     private final TagMapper tagMapper;
     private final PostMapper postMapper;
-    private final FollowerMapper followerMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -63,16 +62,14 @@ public class PageServiceImpl implements PageService {
                 pageEntity.getUnblockDate(),
                 pageEntity.getCreatedAt(),
                 pageEntity.getUpdatedAt(),
-                //pageEntity.getFollowers().stream().map(followerMapper::toDto).toList(),
                 postResponseDtos,
                 pageEntity.getTags().stream().map(tagMapper::toDto).toList()
         );
     }
 
     @Override
-    public List<FollowerResponseDto> getPageFollowersByPageId(Long pageId) {
+    public List<Long> getPageFollowersByPageId(Long pageId, Long userId) {
         PageEntity page = pageRepository.findById(pageId)
-                .filter(p -> p.getIsBlocked() == false)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Page with id={%d} not found", pageId)));
 
         List<Long> userIds = new ArrayList<>();
@@ -81,9 +78,7 @@ public class PageServiceImpl implements PageService {
             userIds.add(follower.getId().getUserId());
         }
 
-        //feign client user-servive - List
-
-        return null;
+        return userIds;
     }
 
     @Override
@@ -93,6 +88,8 @@ public class PageServiceImpl implements PageService {
         }
 
         PageEntity page = pageMapper.fromRequestDto(pageRequestDto);
+
+        page.setCreatorId(userId);
 
         return pageMapper.toDto(pageRepository.save(page));
     }
@@ -134,16 +131,14 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public PageResponseDto block(Long pageId, Long userId) {
+    public void block(Long pageId, Long userId) {
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
         page.setBlocked(true);
     }
 
     @Override
-    public void deletePageById(Long pageId) {
+    public void deletePageById(Long pageId, Long userId) {
         pageRepository.deleteById(pageManagementService.getPageByIdOrThrow(pageId).getId());
     }
-
-
 }

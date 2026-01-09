@@ -1,6 +1,5 @@
 package com.radiuk.innoter_service.service;
 
-import com.radiuk.innoter_service.dto.follower.FollowerResponseDto;
 import com.radiuk.innoter_service.dto.page.PageRequestDto;
 import com.radiuk.innoter_service.dto.page.PageResponseDto;
 
@@ -10,7 +9,7 @@ public interface PageService {
 
     PageResponseDto getPageById(Long pageId, int page, int limit);
 
-    List<FollowerResponseDto> getPageFollowersByPageId(Long pageId);
+    List<Long> getPageFollowersByPageId(Long pageId, Long userId);
 
     PageResponseDto createPage(PageRequestDto pageRequestDto, Long userId);
 
@@ -20,7 +19,7 @@ public interface PageService {
 
     PageResponseDto unfollow(Long pageId, Long userId);
 
-    PageResponseDto block(Long pageId, Long userId);
+    void block(Long pageId, Long userId);
 
-    void deletePageById(Long id);
+    void deletePageById(Long id, Long userId);
 }

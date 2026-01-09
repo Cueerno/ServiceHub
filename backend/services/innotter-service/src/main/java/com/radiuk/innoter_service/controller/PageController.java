@@ -31,8 +31,12 @@ public class PageController {
     }
 
     @GetMapping("/{id}/followers")
-    public ResponseEntity<List<FollowerResponseDto>> getPageFollowers(@PathVariable Long id) {
-        return ResponseEntity.ok(pageService.getPageFollowersByPageId(id));
+    public ResponseEntity<List<Long>> getPageFollowers(
+            @PathVariable Long id,
+            Long userId
+    ) {
+        userId = 1L;
+        return ResponseEntity.ok(pageService.getPageFollowersByPageId(id, userId));
     }
 
     @PostMapping("")
@@ -50,7 +54,12 @@ public class PageController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PageResponseDto> update(PageRequestDto pageRequestDto, @PathVariable Long id, Long userId) {
+    public ResponseEntity<PageResponseDto> update(
+            @PathVariable Long id,
+            @RequestBody PageRequestDto pageRequestDto,
+            Long userId
+    ) {
+        userId = 1L;
         return ResponseEntity.ok(pageService.updatePage(pageRequestDto, id, userId));
     }
 
@@ -67,11 +76,14 @@ public class PageController {
     @PatchMapping("/{id}/block")
     public ResponseEntity<PageResponseDto> block(@PathVariable Long id, Long userId) {
         return ResponseEntity.ok(pageService.block(id, userId));
+        pageService.block(id, userId);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        pageService.deletePageById(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id, Long userId) {
+        userId = 1L;
+        pageService.deletePageById(id, userId);
         return ResponseEntity.noContent().build();
     }
 }
