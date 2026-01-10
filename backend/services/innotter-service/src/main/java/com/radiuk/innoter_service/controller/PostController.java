@@ -18,17 +18,27 @@ public class PostController {
 
     @GetMapping("/feed")
     public ResponseEntity<List<PostResponseDto>> feed(Long userId) {
+        userId = 1L;
         return ResponseEntity.ok(postService.feed(userId));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PostResponseDto> update(@RequestBody PostRequestDto postRequestDto, @PathVariable Long id) {
-        return ResponseEntity.ok(postService.updatePostById(postRequestDto, id));
+    public ResponseEntity<PostResponseDto> update(
+            @PathVariable Long id,
+            @RequestBody PostRequestDto postRequestDto,
+            Long userId
+    ) {
+        userId = 1L;
+        return ResponseEntity.ok(postService.updatePostById(postRequestDto, id, userId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        postService.deletePostById(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            Long userId
+    ) {
+        userId = 1L;
+        postService.deletePostById(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

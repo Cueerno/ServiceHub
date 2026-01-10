@@ -1,6 +1,5 @@
 package com.radiuk.innoter_service.controller;
 
-import com.radiuk.innoter_service.dto.follower.FollowerResponseDto;
 import com.radiuk.innoter_service.dto.page.PageRequestDto;
 import com.radiuk.innoter_service.dto.page.PageResponseDto;
 import com.radiuk.innoter_service.dto.post.PostRequestDto;
@@ -41,6 +40,7 @@ public class PageController {
 
     @PostMapping("")
     public ResponseEntity<PageResponseDto> create(@RequestBody PageRequestDto pageRequestDto, Long userId) {
+        userId = 1L;
         return ResponseEntity.ok(pageService.createPage(pageRequestDto, userId));
     }
 
@@ -50,6 +50,7 @@ public class PageController {
             @RequestBody PostRequestDto postRequestDto,
             Long userId
     ) {
+        userId = 1L;
         return ResponseEntity.ok(postService.createPost(postRequestDto, id, userId));
     }
 
@@ -65,17 +66,19 @@ public class PageController {
 
     @PatchMapping("/{id}/follow")
     public ResponseEntity<PageResponseDto> follow(@PathVariable Long id, Long userId) {
+        userId = 1L;
         return ResponseEntity.ok(pageService.follow(id, userId));
     }
 
     @PatchMapping("/{id}/unfollow")
     public ResponseEntity<PageResponseDto> unfollow(@PathVariable Long id, Long userId) {
+        userId = 1L;
         return ResponseEntity.ok(pageService.unfollow(id, userId));
     }
 
     @PatchMapping("/{id}/block")
     public ResponseEntity<PageResponseDto> block(@PathVariable Long id, Long userId) {
-        return ResponseEntity.ok(pageService.block(id, userId));
+        userId = 1L;
         pageService.block(id, userId);
         return ResponseEntity.noContent().build();
     }

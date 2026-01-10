@@ -12,7 +12,7 @@ public interface PostService {
 
     PostResponseDto createPost(PostRequestDto postRequestDto, Long pageId, Long userId);
 
-    PostResponseDto updatePostById(PostRequestDto postRequestDto, @PathVariable Long id);
+    PostResponseDto updatePostById(PostRequestDto postRequestDto, @PathVariable Long postId, Long userId);
 
-    void deletePostById(Long id);
+    void deletePostById(Long postId, Long userId);
 }
