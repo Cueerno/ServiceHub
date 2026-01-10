@@ -5,6 +5,8 @@ import com.radiuk.innoter_service.dto.post.PostResponseDto;
 import com.radiuk.innoter_service.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,28 +19,27 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/feed")
-    public ResponseEntity<List<PostResponseDto>> feed(Long userId) {
-        userId = 1L;
-        return ResponseEntity.ok(postService.feed(userId));
+    public ResponseEntity<List<PostResponseDto>> feed(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ResponseEntity.ok(postService.feed(jwt));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<PostResponseDto> update(
             @PathVariable Long id,
             @RequestBody PostRequestDto postRequestDto,
-            Long userId
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        userId = 1L;
-        return ResponseEntity.ok(postService.updatePostById(postRequestDto, id, userId));
+        return ResponseEntity.ok(postService.updatePostById(postRequestDto, id, jwt));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id,
-            Long userId
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        userId = 1L;
-        postService.deletePostById(id, userId);
+        postService.deletePostById(id, jwt);
         return ResponseEntity.noContent().build();
     }
 }

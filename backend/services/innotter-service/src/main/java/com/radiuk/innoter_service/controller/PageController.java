@@ -8,6 +8,8 @@ import com.radiuk.innoter_service.service.PageService;
 import com.radiuk.innoter_service.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,61 +34,56 @@ public class PageController {
     @GetMapping("/{id}/followers")
     public ResponseEntity<List<Long>> getPageFollowers(
             @PathVariable Long id,
-            Long userId
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        userId = 1L;
-        return ResponseEntity.ok(pageService.getPageFollowersByPageId(id, userId));
+        return ResponseEntity.ok(pageService.getPageFollowersByPageId(id, jwt));
     }
 
     @PostMapping("")
-    public ResponseEntity<PageResponseDto> create(@RequestBody PageRequestDto pageRequestDto, Long userId) {
-        userId = 1L;
-        return ResponseEntity.ok(pageService.createPage(pageRequestDto, userId));
+    public ResponseEntity<PageResponseDto> create(
+            @RequestBody PageRequestDto pageRequestDto,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ResponseEntity.ok(pageService.createPage(pageRequestDto, jwt));
     }
 
     @PostMapping("/{id}/post")
     public ResponseEntity<PostResponseDto> createPost(
             @PathVariable Long id,
             @RequestBody PostRequestDto postRequestDto,
-            Long userId
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        userId = 1L;
-        return ResponseEntity.ok(postService.createPost(postRequestDto, id, userId));
+        return ResponseEntity.ok(postService.createPost(postRequestDto, id, jwt));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<PageResponseDto> update(
             @PathVariable Long id,
             @RequestBody PageRequestDto pageRequestDto,
-            Long userId
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        userId = 1L;
-        return ResponseEntity.ok(pageService.updatePage(pageRequestDto, id, userId));
+        return ResponseEntity.ok(pageService.updatePage(pageRequestDto, id, jwt));
     }
 
     @PatchMapping("/{id}/follow")
-    public ResponseEntity<PageResponseDto> follow(@PathVariable Long id, Long userId) {
-        userId = 1L;
-        return ResponseEntity.ok(pageService.follow(id, userId));
+    public ResponseEntity<PageResponseDto> follow(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(pageService.follow(id, jwt));
     }
 
     @PatchMapping("/{id}/unfollow")
-    public ResponseEntity<PageResponseDto> unfollow(@PathVariable Long id, Long userId) {
-        userId = 1L;
-        return ResponseEntity.ok(pageService.unfollow(id, userId));
+    public ResponseEntity<PageResponseDto> unfollow(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(pageService.unfollow(id, jwt));
     }
 
     @PatchMapping("/{id}/block")
-    public ResponseEntity<PageResponseDto> block(@PathVariable Long id, Long userId) {
-        userId = 1L;
-        pageService.block(id, userId);
+    public ResponseEntity<PageResponseDto> block(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        pageService.block(id, jwt);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id, Long userId) {
-        userId = 1L;
-        pageService.deletePageById(id, userId);
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        pageService.deletePageById(id, jwt);
         return ResponseEntity.noContent().build();
     }
 }

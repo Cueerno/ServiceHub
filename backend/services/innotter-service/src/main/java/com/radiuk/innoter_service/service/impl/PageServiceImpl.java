@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,7 +69,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public List<Long> getPageFollowersByPageId(Long pageId, Long userId) {
+    public List<Long> getPageFollowersByPageId(Long pageId, Jwt jwt) {
         PageEntity page = pageRepository.findById(pageId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Page with id={%d} not found", pageId)));
 
@@ -82,20 +83,20 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public PageResponseDto createPage(PageRequestDto pageRequestDto, Long userId) {
+    public PageResponseDto createPage(PageRequestDto pageRequestDto, Jwt jwt) {
         if (pageRepository.existsByName(pageRequestDto.name())) {
             throw new PageNotCreatedException(String.format("Page with name %s already exists", pageRequestDto.name()));
         }
 
         PageEntity page = pageMapper.fromRequestDto(pageRequestDto);
 
-        page.setCreatorId(userId);
+        page.setCreatorId(getUserIdFromToken(jwt));
 
         return pageMapper.toDto(pageRepository.save(page));
     }
 
     @Override
-    public PageResponseDto updatePage(PageRequestDto dto, Long pageId, Long userId) {
+    public PageResponseDto updatePage(PageRequestDto dto, Long pageId, Jwt jwt) {
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
         String newPageName = dto.name();
@@ -110,8 +111,8 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public PageResponseDto follow(Long pageId, Long userId) {
-        FollowerId followerId = new FollowerId(pageId, userId);
+    public PageResponseDto follow(Long pageId, Jwt jwt) {
+        FollowerId followerId = new FollowerId(pageId, getUserIdFromToken(jwt));
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
         Follower follower = new Follower(followerId, page);
@@ -122,8 +123,8 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public PageResponseDto unfollow(Long pageId, Long userId) {
-        FollowerId followerId = new FollowerId(pageId, userId);
+    public PageResponseDto unfollow(Long pageId, Jwt jwt) {
+        FollowerId followerId = new FollowerId(pageId, getUserIdFromToken(jwt));
 
         followerRepository.deleteById(followerId);
 
@@ -131,7 +132,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public void block(Long pageId, Long userId) {
+    public void block(Long pageId, Jwt jwt) {
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
         page.setBlocked(true);
@@ -140,5 +141,12 @@ public class PageServiceImpl implements PageService {
     @Override
     public void deletePageById(Long pageId, Long userId) {
         pageRepository.deleteById(pageManagementService.getPageByIdOrThrow(pageId).getId());
+    public void deletePageById(Long pageId, Jwt jwt) {
+        PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
+        pageRepository.deleteById(page.getId());
+    }
+
+    private Long getUserIdFromToken(Jwt jwt) {
+        return Long.valueOf(jwt.getSubject());
     }
 }

@@ -2,17 +2,18 @@ package com.radiuk.innoter_service.service;
 
 import com.radiuk.innoter_service.dto.post.PostRequestDto;
 import com.radiuk.innoter_service.dto.post.PostResponseDto;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
 public interface PostService {
 
-    List<PostResponseDto> feed(Long userId);
+    List<PostResponseDto> feed(Jwt jwt);
 
-    PostResponseDto createPost(PostRequestDto postRequestDto, Long pageId, Long userId);
+    PostResponseDto createPost(PostRequestDto postRequestDto, Long pageId, Jwt jwt);
 
-    PostResponseDto updatePostById(PostRequestDto postRequestDto, @PathVariable Long postId, Long userId);
+    PostResponseDto updatePostById(PostRequestDto postRequestDto, @PathVariable Long postId, Jwt jwt);
 
-    void deletePostById(Long postId, Long userId);
+    void deletePostById(Long postId, Jwt jwt);
 }

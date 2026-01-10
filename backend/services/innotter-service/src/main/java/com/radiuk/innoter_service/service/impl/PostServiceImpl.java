@@ -11,6 +11,7 @@ import com.radiuk.innoter_service.service.PageManagementService;
 import com.radiuk.innoter_service.service.PostService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +29,8 @@ public class PostServiceImpl implements PostService {
     private final PageManagementService pageManagementService;
 
     @Override
-    public List<PostResponseDto> feed(Long userId) {
-        List<PageEntity> userPages = pageRepository.findByCreatorId(userId);
+    public List<PostResponseDto> feed(Jwt jwt) {
+        List<PageEntity> userPages = pageRepository.findByCreatorId(Long.valueOf(jwt.getSubject()));
 
         List<Post> userPosts = new ArrayList<>();
 
@@ -43,8 +44,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDto createPost(PostRequestDto postRequestDto, Long pageId, Long userId) {
+    public PostResponseDto createPost(PostRequestDto postRequestDto, Long pageId, Jwt jwt) {
         Post post = postMapper.fromRequestDto(postRequestDto);
+        PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
         post.setPage(pageManagementService.getPageByIdOrThrow(pageId));
 
@@ -52,7 +54,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDto updatePostById(PostRequestDto postRequestDto, Long postId, Long userId) {
+    public PostResponseDto updatePostById(PostRequestDto postRequestDto, Long postId, Jwt jwt) {
         Post post = getPostByIdOrThrow(postId);
 
         postMapper.updateFromDto(postRequestDto, post);
@@ -63,6 +65,9 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePostById(Long postId, Long userId) {
         postRepository.deleteById(getPostByIdOrThrow(postId).getId());
+    public void deletePostById(Long postId, Jwt jwt) {
+        Post post = getPostByIdOrThrow(postId);
+        postRepository.deleteById(post.getId());
     }
 
     private Post getPostByIdOrThrow(Long postId) {
