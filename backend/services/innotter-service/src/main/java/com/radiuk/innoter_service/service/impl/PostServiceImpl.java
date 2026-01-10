@@ -52,8 +52,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDto updatePostById(PostRequestDto postRequestDto, Long postId) {
-        Post post = getPostBIdOrThrow(postId);
+    public PostResponseDto updatePostById(PostRequestDto postRequestDto, Long postId, Long userId) {
+        Post post = getPostByIdOrThrow(postId);
 
         postMapper.updateFromDto(postRequestDto, post);
 
@@ -61,11 +61,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void deletePostById(Long postId) {
-        postRepository.deleteById(getPostBIdOrThrow(postId).getId());
+    public void deletePostById(Long postId, Long userId) {
+        postRepository.deleteById(getPostByIdOrThrow(postId).getId());
     }
 
-    private Post getPostBIdOrThrow(Long postId) {
+    private Post getPostByIdOrThrow(Long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Post with id={%d} not found", postId)));
     }
