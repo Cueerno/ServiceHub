@@ -8,6 +8,7 @@ import com.radiuk.innoter_service.mapper.TagMapper;
 import com.radiuk.innoter_service.repository.TagRepository;
 import com.radiuk.innoter_service.service.TagService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
@@ -24,9 +26,11 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<TagResponseDto> getTagsWithPaginationAndLimitAndFilter(int page, int limit, String filterByName) {
+        log.debug("Get tags called: page={}, limit={}, filterByName={}", page, limit, filterByName);
+
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.ASC, "name"));
 
-        return (
+        List<TagResponseDto> result = (
                 (filterByName == null || filterByName.isBlank())
                         ? tagRepository.findAll(pageable).getContent()
                         : tagRepository.findByNameContainingIgnoreCase(pageable, filterByName).getContent()
@@ -34,16 +38,23 @@ public class TagServiceImpl implements TagService {
                 .stream()
                 .map(tagMapper::toDto)
                 .toList();
+
+        log.info("Returning {} tags (page={}, limit={}, filter={})", result.size(), page, limit, filterByName);
+        return result;
     }
 
     @Override
-    public TagResponseDto createTag(TagRequestDto tagRequestDto) {
-        Tag tag = tagMapper.fromRequestDto(tagRequestDto);
+    public TagResponseDto createTag(TagRequestDto dto) {
+        log.debug("Creating tag with name={}", dto.name());
 
-        if (tagRepository.existsByName(tagRequestDto.name())) {
+        Tag tag = tagMapper.fromRequestDto(dto);
+
+        if (tagRepository.existsByName(dto.name())) {
+            log.warn("Tag creation failed: tag with name '{}' already exists", dto.name());
             throw new TagNotCreatedException("Tag already exists");
         }
 
+        log.info("Tag created with name={}", dto.name());
         return tagMapper.toDto(tagRepository.save(tag));
     }
 }
