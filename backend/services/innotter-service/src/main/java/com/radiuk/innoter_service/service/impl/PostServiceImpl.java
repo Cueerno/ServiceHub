@@ -7,6 +7,7 @@ import com.radiuk.innoter_service.entity.Post;
 import com.radiuk.innoter_service.mapper.PostMapper;
 import com.radiuk.innoter_service.repository.PageRepository;
 import com.radiuk.innoter_service.repository.PostRepository;
+import com.radiuk.innoter_service.service.AuthorizationService;
 import com.radiuk.innoter_service.service.PageManagementService;
 import com.radiuk.innoter_service.service.PostService;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,10 +28,11 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final PageRepository pageRepository;
     private final PageManagementService pageManagementService;
+    private final AuthorizationService authorizationService;
 
     @Override
     public List<PostResponseDto> feed(Jwt jwt) {
-        List<PageEntity> userPages = pageRepository.findByCreatorId(Long.valueOf(jwt.getSubject()));
+        List<PageEntity> userPages = pageRepository.findByCreatorId(authorizationService.getUserIdFromToken(jwt));
 
         List<Post> userPosts = new ArrayList<>();
 
@@ -48,6 +50,8 @@ public class PostServiceImpl implements PostService {
         Post post = postMapper.fromRequestDto(postRequestDto);
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
+        authorizationService.canAccessUser(page, jwt);
+
         post.setPage(pageManagementService.getPageByIdOrThrow(pageId));
 
         return postMapper.toDto(postRepository.save(post));
@@ -57,16 +61,17 @@ public class PostServiceImpl implements PostService {
     public PostResponseDto updatePostById(PostRequestDto postRequestDto, Long postId, Jwt jwt) {
         Post post = getPostByIdOrThrow(postId);
 
+        authorizationService.canAccessUser(post.getPage(), jwt);
+
         postMapper.updateFromDto(postRequestDto, post);
 
         return postMapper.toDto(post);
     }
 
     @Override
-    public void deletePostById(Long postId, Long userId) {
-        postRepository.deleteById(getPostByIdOrThrow(postId).getId());
     public void deletePostById(Long postId, Jwt jwt) {
         Post post = getPostByIdOrThrow(postId);
+        authorizationService.canAccessUser(post.getPage(), jwt);
         postRepository.deleteById(post.getId());
     }
 

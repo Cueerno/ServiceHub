@@ -15,6 +15,7 @@ import com.radiuk.innoter_service.mapper.TagMapper;
 import com.radiuk.innoter_service.repository.FollowerRepository;
 import com.radiuk.innoter_service.repository.PageRepository;
 import com.radiuk.innoter_service.repository.PostRepository;
+import com.radiuk.innoter_service.service.AuthorizationService;
 import com.radiuk.innoter_service.service.PageManagementService;
 import com.radiuk.innoter_service.service.PageService;
 import jakarta.persistence.EntityNotFoundException;
@@ -41,6 +42,7 @@ public class PageServiceImpl implements PageService {
     private final FollowerRepository followerRepository;
     private final TagMapper tagMapper;
     private final PostMapper postMapper;
+    private final AuthorizationService authorizationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -73,6 +75,8 @@ public class PageServiceImpl implements PageService {
         PageEntity page = pageRepository.findById(pageId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Page with id={%d} not found", pageId)));
 
+        authorizationService.checkAccess(page, jwt);
+
         List<Long> userIds = new ArrayList<>();
 
         for (Follower follower : page.getFollowers()) {
@@ -98,6 +102,8 @@ public class PageServiceImpl implements PageService {
     @Override
     public PageResponseDto updatePage(PageRequestDto dto, Long pageId, Jwt jwt) {
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
+
+        authorizationService.checkAccess(page, jwt);
 
         String newPageName = dto.name();
 
@@ -135,14 +141,15 @@ public class PageServiceImpl implements PageService {
     public void block(Long pageId, Jwt jwt) {
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
+        authorizationService.checkAccess(page, jwt);
+
         page.setBlocked(true);
     }
 
     @Override
-    public void deletePageById(Long pageId, Long userId) {
-        pageRepository.deleteById(pageManagementService.getPageByIdOrThrow(pageId).getId());
     public void deletePageById(Long pageId, Jwt jwt) {
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
+        authorizationService.canAccessUser(page, jwt);
         pageRepository.deleteById(page.getId());
     }
 
