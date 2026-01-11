@@ -6,3 +6,7 @@ gen
 
 # Docker
 .env
+
+# Spring Boot
+*.properties
+!application.properties.example
