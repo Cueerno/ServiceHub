@@ -18,8 +18,8 @@ import com.radiuk.innoter_service.repository.PostRepository;
 import com.radiuk.innoter_service.service.AuthorizationService;
 import com.radiuk.innoter_service.service.PageManagementService;
 import com.radiuk.innoter_service.service.PageService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -47,6 +48,7 @@ public class PageServiceImpl implements PageService {
     @Override
     @Transactional(readOnly = true)
     public PageResponseDto getPageById(Long pageId, int page, int limit) {
+        log.debug("Getting pages: pageId={}, page={}, limit={}", pageId, page, limit);
         PageEntity pageEntity = pageManagementService.getPageByIdOrThrow(pageId);
 
         Pageable pageable = PageRequest.of(page - 1, limit);
@@ -58,6 +60,7 @@ public class PageServiceImpl implements PageService {
                 .stream().map(postMapper::toDto)
                 .toList();
 
+        log.info("Returning page id={}, name={}", pageEntity.getId(), pageEntity.getName());
         return new PageResponseDto(
                 pageEntity.getName(),
                 pageEntity.getDescription(),
@@ -72,8 +75,8 @@ public class PageServiceImpl implements PageService {
 
     @Override
     public List<Long> getPageFollowersByPageId(Long pageId, Jwt jwt) {
-        PageEntity page = pageRepository.findById(pageId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Page with id={%d} not found", pageId)));
+        log.debug("Getting page followers: pageId={}, requester={}", pageId, jwt.getSubject());
+        PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
         authorizationService.checkAccess(page, jwt);
 
@@ -83,12 +86,16 @@ public class PageServiceImpl implements PageService {
             userIds.add(follower.getId().getUserId());
         }
 
+        log.info("Followers count for pageId={} => {}", pageId, userIds.size());
         return userIds;
     }
 
     @Override
     public PageResponseDto createPage(PageRequestDto pageRequestDto, Jwt jwt) {
+        log.debug("Creating page called by requester={}, name={}", jwt.getSubject(), pageRequestDto.name());
+
         if (pageRepository.existsByName(pageRequestDto.name())) {
+            log.warn("Page creation failed: name already exists '{}'", pageRequestDto.name());
             throw new PageNotCreatedException(String.format("Page with name %s already exists", pageRequestDto.name()));
         }
 
@@ -96,11 +103,16 @@ public class PageServiceImpl implements PageService {
 
         page.setCreatorId(getUserIdFromToken(jwt));
 
-        return pageMapper.toDto(pageRepository.save(page));
+        PageEntity saved = pageRepository.save(page);
+
+        log.info("Page created: id={}, name={}, creatorId={}", saved.getId(), saved.getName(), saved.getCreatorId());
+        return pageMapper.toDto(saved);
     }
 
     @Override
     public PageResponseDto updatePage(PageRequestDto dto, Long pageId, Jwt jwt) {
+        log.debug("Updating page: pageId={}, requester={}", pageId, jwt.getSubject());
+
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
         authorizationService.checkAccess(page, jwt);
@@ -108,49 +120,59 @@ public class PageServiceImpl implements PageService {
         String newPageName = dto.name();
 
         if (newPageName != null && !newPageName.equals(page.getName()) && pageRepository.existsByName(dto.name())) {
+            log.warn("Page update failed: name '{}' already exists", newPageName);
             throw new PageNotUpdatedException(String.format("Page with name %s already exists", newPageName));
         }
 
         pageMapper.updateFromDto(dto, page);
 
+        log.info("Page updated: pageId={}, requester={}", pageId, jwt.getSubject());
         return pageMapper.toDto(page);
     }
 
     @Override
     public PageResponseDto follow(Long pageId, Jwt jwt) {
-        FollowerId followerId = new FollowerId(pageId, getUserIdFromToken(jwt));
+        Long requesterId = getUserIdFromToken(jwt);
+        log.debug("User following on the page: pageId={}, requesterId={}", pageId, requesterId);
+
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
-
-        Follower follower = new Follower(followerId, page);
-
+        Follower follower = new Follower(new FollowerId(pageId, requesterId), page);
         followerRepository.save(follower);
 
+        log.info("User {} followed page {}", requesterId, pageId);
         return pageMapper.toDto(page);
     }
 
     @Override
     public PageResponseDto unfollow(Long pageId, Jwt jwt) {
-        FollowerId followerId = new FollowerId(pageId, getUserIdFromToken(jwt));
+        Long requesterId = getUserIdFromToken(jwt);
+        log.debug("User unfollowing on the page: pageId={}, requesterId={}", pageId, requesterId);
 
-        followerRepository.deleteById(followerId);
+        followerRepository.deleteById(new FollowerId(pageId, requesterId));
 
+        log.info("User {} unfollowed page {}", requesterId, pageId);
         return pageMapper.toDto(pageManagementService.getPageByIdOrThrow(pageId));
     }
 
     @Override
     public void block(Long pageId, Jwt jwt) {
+        log.debug("Blocking page: pageId={}, requester={}", pageId, jwt.getSubject());
+
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
         authorizationService.checkAccess(page, jwt);
 
         page.setBlocked(true);
+        log.warn("Page blocked: pageId={}, by={}", pageId, jwt.getSubject());
     }
 
     @Override
     public void deletePageById(Long pageId, Jwt jwt) {
+        log.debug("Deleting page: pageId={}, requester={}", pageId, jwt.getSubject());
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
         authorizationService.canAccessUser(page, jwt);
         pageRepository.deleteById(page.getId());
+        log.warn("Page deleted: pageId={}, requester={}", pageId, jwt.getSubject());
     }
 
     private Long getUserIdFromToken(Jwt jwt) {
