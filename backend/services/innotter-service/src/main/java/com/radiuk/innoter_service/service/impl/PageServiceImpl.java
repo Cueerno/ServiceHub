@@ -72,8 +72,7 @@ public class PageServiceImpl implements PageService {
 
     @Override
     public List<Long> getPageFollowersByPageId(Long pageId, Jwt jwt) {
-        PageEntity page = pageRepository.findById(pageId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Page with id={%d} not found", pageId)));
+        PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
 
         authorizationService.checkAccess(page, jwt);
 

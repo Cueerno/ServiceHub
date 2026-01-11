@@ -31,11 +31,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
 
     public boolean isAdmin(Jwt jwt) {
-        return getUserRolesFromToken(jwt).contains(Role.ADMIN.name());
-    }
-
-    public boolean isModerator(Jwt jwt) {
-        return getUserRolesFromToken(jwt).contains(Role.MODERATOR.name());
     }
 
     public boolean isPageOwner(PageEntity page, Jwt jwt) {

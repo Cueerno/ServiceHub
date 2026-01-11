@@ -13,7 +13,5 @@ public interface AuthorizationService {
 
      boolean isAdmin(Jwt jwt);
 
-     boolean isModerator(Jwt jwt);
-
      boolean isPageOwner(PageEntity page, Jwt jwt);
 }
