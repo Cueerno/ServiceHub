@@ -74,14 +74,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resetPasswordRequest(Jwt jwt) {
+    public void resetPasswordRequest(PasswordResetRequestDto dto) {
 
     }
 
 
     @Override
-    public void resetPasswordConfirm(ResetPasswordDto resetPasswordDto, Jwt jwt) {
-        log.debug("Resetting password for user {}", jwt.getClaim("email").toString());
+    public void resetPasswordConfirm(PasswordResetConfirmDto dto) {
 
         User user = userRepository.findById(Long.valueOf(jwt.getSubject()))
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials, user not found"));

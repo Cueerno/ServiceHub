@@ -77,18 +77,17 @@ public class AuthController {
 
     @PostMapping("/password/reset/request")
     public ResponseEntity<Void> resetPasswordRequest(
-            @AuthenticationPrincipal Jwt jwt
+            @RequestBody PasswordResetRequestDto passwordResetRequestDto
     ) {
-        authService.resetPasswordRequest(jwt);
+        authService.resetPasswordRequest(passwordResetRequestDto);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/password/reset/confirm")
     public ResponseEntity<Void> resetPasswordConfirm(
-            ResetPasswordDto resetPasswordDto,
-            @AuthenticationPrincipal Jwt jwt
+            @RequestBody PasswordResetConfirmDto passwordResetConfirmDto
     ) {
-        authService.resetPasswordConfirm(resetPasswordDto, jwt);
+        authService.resetPasswordConfirm(passwordResetConfirmDto);
         return ResponseEntity.noContent().build();
     }
 
