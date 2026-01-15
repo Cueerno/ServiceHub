@@ -1,8 +1,8 @@
 package com.radiuk.user_management_service.dto;
 
-public record ResetPasswordDto(
+public record PasswordResetConfirmDto(
 
-        String oldPassword,
+        String token,
         String newPassword
 ) {
 }
