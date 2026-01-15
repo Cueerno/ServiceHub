@@ -9,7 +9,9 @@ public interface AuthService {
 
     AuthResponse authenticate(UserAuthDto dto);
 
-    void resetPassword(ResetPasswordDto resetPasswordDto, Jwt jwt);
+    void resetPasswordRequest(Jwt jwt);
+
+    void resetPasswordConfirm(ResetPasswordDto resetPasswordDto, Jwt jwt);
 
     void logout(Jwt jwt);
 }

@@ -74,7 +74,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resetPassword(ResetPasswordDto resetPasswordDto, Jwt jwt) {
+    public void resetPasswordRequest(Jwt jwt) {
+
+    }
+
+
+    @Override
+    public void resetPasswordConfirm(ResetPasswordDto resetPasswordDto, Jwt jwt) {
         log.debug("Resetting password for user {}", jwt.getClaim("email").toString());
 
         User user = userRepository.findById(Long.valueOf(jwt.getSubject()))
