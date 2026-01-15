@@ -1,21 +1,29 @@
 package com.radiuk.user_management_service.service.impl;
 
 import com.radiuk.user_management_service.dto.*;
+import com.radiuk.user_management_service.entity.PasswordResetToken;
 import com.radiuk.user_management_service.entity.Role;
 import com.radiuk.user_management_service.entity.User;
+import com.radiuk.user_management_service.event.ResetPasswordEvent;
 import com.radiuk.user_management_service.exception.UserNotCreatedException;
 import com.radiuk.user_management_service.mapper.UserMapper;
+import com.radiuk.user_management_service.repository.PasswordResetTokenRepository;
 import com.radiuk.user_management_service.repository.UserRepository;
 import com.radiuk.user_management_service.service.AuthService;
 import com.radiuk.user_management_service.service.JwtService;
 import com.radiuk.user_management_service.service.RefreshTokenService;
+import com.radiuk.user_management_service.util.ResetTokenGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.time.Instant;
 
 @Slf4j
 @Service
@@ -28,6 +36,11 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final ResetTokenGenerator resetTokenGenerator;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    private static final Duration TOKEN_TTL = Duration.ofMinutes(10);
 
     @Override
     public UserResponseDto register(UserRegistrationDto userRegistrationDto) {
@@ -75,22 +88,47 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resetPasswordRequest(PasswordResetRequestDto dto) {
+        userRepository.findByEmail(dto.email()).ifPresent(user -> {
+            String token = resetTokenGenerator.generate();
 
+            PasswordResetToken passwordResetToken = PasswordResetToken.builder()
+                    .token(token)
+                    .userId(user.getId())
+                    .expiresAt(Instant.now().plus(TOKEN_TTL))
+                    .used(false)
+                    .build();
+
+            passwordResetTokenRepository.save(passwordResetToken);
+
+            applicationEventPublisher.publishEvent(
+                    new ResetPasswordEvent(
+                            user.getEmail(),
+                            token,
+                            passwordResetToken.getExpiresAt()
+                    )
+            );
+        });
     }
 
 
     @Override
     public void resetPasswordConfirm(PasswordResetConfirmDto dto) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(dto.token())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
 
-        User user = userRepository.findById(Long.valueOf(jwt.getSubject()))
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials, user not found"));
-
-        if (!passwordEncoder.matches(resetPasswordDto.oldPassword(), resetPasswordDto.newPassword())) {
-            throw new BadCredentialsException("Invalid credentials: invalid password");
+        if (resetToken.isUsed()) {
+            throw new IllegalStateException("Token already used");
         }
 
-        log.info("Reset password user with email {}", jwt.getClaim("email").toString());
-        user.setPassword(passwordEncoder.encode(resetPasswordDto.newPassword()));
+        if (resetToken.getExpiresAt().isBefore(Instant.now())) {
+            throw new IllegalStateException("Token expired");
+        }
+
+        User user = userRepository.findById(resetToken.getUserId())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(dto.newPassword()));
+        resetToken.setUsed(true);
     }
 
     @Override
