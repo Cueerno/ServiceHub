@@ -14,5 +14,11 @@ spring.jpa.properties.hibernate.show_sql=true
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.hibernate.ddl-auto=validate
 
+# Rabbit
+spring.rabbitmq.host=localhost
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=
+spring.rabbitmq.password=
+
 # Actuator
 management.endpoints.web.exposure.include=health, info, metrics
