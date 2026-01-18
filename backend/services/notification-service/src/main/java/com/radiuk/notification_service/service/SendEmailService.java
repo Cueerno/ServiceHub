@@ -24,7 +24,7 @@ public class SendEmailService {
         List<ResetPasswordMessage> unsendMessages = repository.findBySentAtIsNull();
 
         for (ResetPasswordMessage message : unsendMessages) {
-            System.out.println(message);
+            log.info("Sending message to reset password email={}",  message.getEmailAddress());
             message.setSentAt(Instant.now());
         }
     }

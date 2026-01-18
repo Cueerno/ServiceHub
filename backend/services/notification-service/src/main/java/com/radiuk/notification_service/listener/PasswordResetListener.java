@@ -20,6 +20,8 @@ public class PasswordResetListener {
 
     @RabbitListener(queues = RabbitConstants.PASSWORD_RESET_QUEUE)
     public void handlePasswordReset(PasswordResetEvent event) {
+        log.debug("Received Password Reset, email={}", event.email());
+
         ResetPasswordMessage message = ResetPasswordMessage.builder()
                 .userId(event.userId())
                 .emailAddress(event.email())
@@ -28,6 +30,8 @@ public class PasswordResetListener {
                 .build();
 
         resetPasswordRepository.save(message);
+
+        log.info("Password reset email saved, email={}", event.email());
     }
 
     private String buildBody(PasswordResetEvent event) {
