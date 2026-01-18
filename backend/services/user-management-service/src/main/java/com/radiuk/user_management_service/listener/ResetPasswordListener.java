@@ -1,5 +1,7 @@
-package com.radiuk.user_management_service.event;
+package com.radiuk.user_management_service.listener;
 
+import com.radiuk.user_management_service.event.ResetPasswordEvent;
+import com.radiuk.user_management_service.publisher.ResetPasswordPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
