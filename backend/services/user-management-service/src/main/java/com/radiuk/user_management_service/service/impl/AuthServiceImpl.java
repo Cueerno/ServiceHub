@@ -102,6 +102,7 @@ public class AuthServiceImpl implements AuthService {
 
             applicationEventPublisher.publishEvent(
                     new ResetPasswordEvent(
+                            user.getId(),
                             user.getEmail(),
                             token,
                             passwordResetToken.getExpiresAt()
