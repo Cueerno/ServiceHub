@@ -12,6 +12,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Builder
+@ToString
 @Table(name = "reset_password_messages")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class ResetPasswordMessage {
 
     @Id
+    @GeneratedValue
     @Column(nullable = false)
     private UUID id;
 
@@ -31,14 +33,13 @@ public class ResetPasswordMessage {
     @Column(nullable = false)
     private String subject;
 
-    @Column(nullable = false, length = Integer.MAX_VALUE)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
 
     @CreatedDate
     @Column(nullable = false)
     private Instant publishedAt;
 
-   // @Column(nullable = false)
     private Instant sentAt;
 
 }
