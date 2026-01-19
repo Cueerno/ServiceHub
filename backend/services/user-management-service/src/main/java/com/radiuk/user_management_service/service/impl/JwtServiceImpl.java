@@ -38,13 +38,13 @@ public class JwtServiceImpl implements JwtService {
                 .issuer("auth-service")
                 .issuedAt(now)
                 .subject(user.getId().toString())
-                .expiresAt(now.plusSeconds(tokenExpirySeconds))
-                .claim("email", user.getEmail())
-                .claim("authorities", List.of(user.getRole().name()))
+                .expiresAt(now.plus(accessTokenTtl))
+                .claim(JwtClaims.EMAIL, user.getEmail())
+                .claim(JwtClaims.AUTHORITIES, List.of(user.getRole().name()))
                 .id(jti);
 
         if (user.getGroup() != null) {
-            claimsBuilder.claim("groupId", user.getGroup().getId());
+            claimsBuilder.claim(JwtClaims.GROUP_ID, user.getGroup().getId());
         }
 
         JwtClaimsSet claims = claimsBuilder.build();
