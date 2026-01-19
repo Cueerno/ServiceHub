@@ -24,8 +24,9 @@ public class PasswordResetToken {
     @Column(nullable = false, unique = true, length = 128)
     private String token;
 
-    @Column(nullable = false)
-    private Long userId;
+    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private User user;
 
     @Column(nullable = false)
     private Instant expiresAt;

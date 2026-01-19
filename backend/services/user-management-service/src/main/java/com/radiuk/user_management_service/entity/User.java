@@ -67,4 +67,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade =  CascadeType.ALL, orphanRemoval = true)
     List<RefreshToken> refreshTokens = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade =  CascadeType.ALL, orphanRemoval = true)
+    List<PasswordResetToken> passwordResetTokens = new ArrayList<>();
 }
