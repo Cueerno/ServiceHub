@@ -70,10 +70,4 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         log.debug("Revoke refresh token for user {}", jti);
         refreshTokenRepository.revokeByJti(jti);
     }
-
-    @Override
-    public void revokeAll(User user) {
-        log.debug("Revoke all refresh tokens for user with email {}", user.getEmail());
-        refreshTokenRepository.deleteAllByUser(user);
-    }
 }

@@ -6,9 +6,7 @@ public interface RefreshTokenService {
 
     String createRefreshToken(User user, String jti);
 
-    User validateAndGetUser(String refreshToken);
+    User validateAndGetUser(String refreshToken, String jti);
 
     void revokeByJti(String jti);
-
-    void revokeAll(User user);
 }

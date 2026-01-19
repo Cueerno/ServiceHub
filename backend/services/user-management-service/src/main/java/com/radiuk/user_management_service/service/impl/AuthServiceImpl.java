@@ -95,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
 
             PasswordResetToken passwordResetToken = PasswordResetToken.builder()
                     .token(token)
-                    .userId(user.getId())
+                    .user(user)
                     .expiresAt(Instant.now().plus(TOKEN_TTL))
                     .used(false)
                     .build();
@@ -127,7 +127,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ExpiredPasswordResetTokenException("Token expired");
         }
 
-        User user = userRepository.findById(resetToken.getUserId())
+        User user = userRepository.findById(resetToken.getUser().getId())
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
         user.setPassword(passwordEncoder.encode(dto.newPassword()));
