@@ -9,6 +9,7 @@ import com.radiuk.user_management_service.repository.UserRepository;
 import com.radiuk.user_management_service.service.AuthService;
 import com.radiuk.user_management_service.service.JwtService;
 import com.radiuk.user_management_service.service.RefreshTokenService;
+import com.radiuk.user_management_service.util.JwtClaims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -75,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(Jwt jwt) {
-        log.info("Logout user {}", jwt.getClaim("email").toString());
+        log.info("Logout user {}", jwt.getClaim(JwtClaims.EMAIL).toString());
         refreshTokenService.revokeByJti(jwt.getId());
     }
 }

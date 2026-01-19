@@ -9,6 +9,7 @@ import com.radiuk.user_management_service.exception.UserNotUpdatedException;
 import com.radiuk.user_management_service.mapper.UserMapper;
 import com.radiuk.user_management_service.repository.UserRepository;
 import com.radiuk.user_management_service.service.UserService;
+import com.radiuk.user_management_service.util.JwtClaims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -128,7 +129,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (isModerator(jwt)) {
-            Long groupId = jwt.getClaim("groupId");
+            Long groupId = jwt.getClaim(JwtClaims.GROUP_ID);
             boolean allowed = groupId != null
                     && user.getGroup() != null
                     && groupId.equals(user.getGroup().getId());
@@ -161,7 +162,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private List<String> getUserRolesFromToken(Jwt jwt) {
-        return jwt.getClaim("authorities");
+        return jwt.getClaim(JwtClaims.AUTHORITIES);
     }
 
 
