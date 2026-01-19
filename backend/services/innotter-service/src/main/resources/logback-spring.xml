@@ -38,7 +38,7 @@
         <appender-ref ref="SYSTEM_FILE"/>
     </logger>
 
-    <logger name="com.radiuk.innotter-service" level="DEBUG" additivity="false">
+    <logger name="com.radiuk.innotter_service" level="DEBUG" additivity="false">
         <appender-ref ref="APP_FILE"/>
         <appender-ref ref="CONSOLE"/>
     </logger>
