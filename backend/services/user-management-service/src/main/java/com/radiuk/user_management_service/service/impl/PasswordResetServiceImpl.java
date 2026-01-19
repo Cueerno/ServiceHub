@@ -12,6 +12,7 @@ import com.radiuk.user_management_service.repository.UserRepository;
 import com.radiuk.user_management_service.service.PasswordResetService;
 import com.radiuk.user_management_service.util.ResetTokenGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,8 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final ResetTokenGenerator resetTokenGenerator;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    private static final Duration TOKEN_TTL = Duration.ofMinutes(10);
+    @Value("${security.password-reset.token-ttl}")
+    private Duration passwordResetTokenTtl;
 
     @Override
     public void resetPasswordRequest(PasswordResetRequestDto dto) {
@@ -39,7 +41,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             PasswordResetToken passwordResetToken = PasswordResetToken.builder()
                     .token(token)
                     .user(user)
-                    .expiresAt(Instant.now().plus(TOKEN_TTL))
+                    .expiresAt(Instant.now().plus(passwordResetTokenTtl))
                     .used(false)
                     .build();
 
