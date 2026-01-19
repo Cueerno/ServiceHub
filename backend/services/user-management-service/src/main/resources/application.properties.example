@@ -14,9 +14,21 @@ spring.jpa.properties.hibernate.show_sql=true
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.hibernate.ddl-auto=validate
 
-# JWT
-jwt.secret-base64=
-jwt.expiration=900
-jwt.refresh-expiration=604800
+# Rabbit
+spring.rabbitmq.host=localhost
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=
+spring.rabbitmq.password=
 
+# Security
+jwt.secret-base64=
+jwt.access-token-ttl=15m
+jwt.refresh-token-ttl=7d
+jwt.issuer=user-management-service
+security.password-reset.token-ttl=10m
+
+# Actuator
+management.endpoints.web.exposure.include=health, info, metrics
+
+# Scheduling
 spring.task.scheduling.pool.size=1

@@ -11,7 +11,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "groups")
+@Table(name = "groups", schema = "user_management_service")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

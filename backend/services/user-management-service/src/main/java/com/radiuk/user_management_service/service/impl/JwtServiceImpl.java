@@ -3,6 +3,7 @@ package com.radiuk.user_management_service.service.impl;
 import com.radiuk.user_management_service.dto.JwtWithJti;
 import com.radiuk.user_management_service.entity.User;
 import com.radiuk.user_management_service.service.JwtService;
+import com.radiuk.user_management_service.util.JwtClaims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -22,8 +24,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
-    @Value("${jwt.expiration}")
-    private long tokenExpirySeconds;
+    @Value("${jwt.access-token-ttl}")
+    private Duration accessTokenTtl;
+
+    @Value("${jwt.issuer}")
+    private String issuer;
 
     private final JwtEncoder jwtEncoder;
 
@@ -35,16 +40,16 @@ public class JwtServiceImpl implements JwtService {
         String jti = UUID.randomUUID().toString();
 
         JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
-                .issuer("auth-service")
+                .issuer(issuer)
                 .issuedAt(now)
                 .subject(user.getId().toString())
-                .expiresAt(now.plusSeconds(tokenExpirySeconds))
-                .claim("email", user.getEmail())
-                .claim("authorities", List.of(user.getRole().name()))
+                .expiresAt(now.plus(accessTokenTtl))
+                .claim(JwtClaims.EMAIL, user.getEmail())
+                .claim(JwtClaims.AUTHORITIES, List.of(user.getRole().name()))
                 .id(jti);
 
         if (user.getGroup() != null) {
-            claimsBuilder.claim("groupId", user.getGroup().getId());
+            claimsBuilder.claim(JwtClaims.GROUP_ID, user.getGroup().getId());
         }
 
         JwtClaimsSet claims = claimsBuilder.build();

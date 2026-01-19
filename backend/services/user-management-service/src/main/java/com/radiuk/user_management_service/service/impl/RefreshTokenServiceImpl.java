@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -22,8 +23,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    @Value("${jwt.refresh-expiration}")
-    private long refreshTokenExpirationSeconds;
+    @Value("${jwt.refresh-token-ttl}")
+    private Duration refreshTokenTtl;
 
     @Override
     public String createRefreshToken(User user, String jti) {
@@ -35,7 +36,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshToken.setTokenHash(passwordEncoder.encode(rawToken));
         refreshToken.setJti(jti);
         refreshToken.setUser(user);
-        refreshToken.setExpiresAt(Instant.now().plusSeconds(refreshTokenExpirationSeconds));
+        refreshToken.setExpiresAt(Instant.now().plus(refreshTokenTtl));
 
         refreshTokenRepository.save(refreshToken);
 
@@ -44,10 +45,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public User validateAndGetUser(String refreshToken) {
-        RefreshToken token = refreshTokenRepository.findAll().stream()
-                .filter(t -> passwordEncoder.matches(refreshToken, t.getTokenHash()))
-                .findFirst()
+    public User validateAndGetUser(String refreshToken, String jti) {
+        RefreshToken token = refreshTokenRepository.findByJtiAndRevokedFalse(jti)
                 .orElseThrow(() -> new JwtException("Invalid refresh token"));
 
         log.debug("Validating refresh token for user with email{}", token.getUser().getEmail());
@@ -71,11 +70,5 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public void revokeByJti(String jti) {
         log.debug("Revoke refresh token for user {}", jti);
         refreshTokenRepository.revokeByJti(jti);
-    }
-
-    @Override
-    public void revokeAll(User user) {
-        log.debug("Revoke all refresh tokens for user with email {}", user.getEmail());
-        refreshTokenRepository.deleteAllByUser(user);
     }
 }
