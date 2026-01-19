@@ -69,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
         JwtWithJti jwt = jwtService.generateToken(user);
         String refreshToken = refreshTokenService.createRefreshToken(user, jwt.jti());
 
-        log.info("Authenticated user with email {}", dto.login());
+        log.info("Authenticated user with login {}", dto.login());
         return new AuthResponse(jwt, refreshToken);
     }
 

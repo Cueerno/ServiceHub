@@ -12,6 +12,7 @@ import com.radiuk.user_management_service.repository.UserRepository;
 import com.radiuk.user_management_service.service.PasswordResetService;
 import com.radiuk.user_management_service.util.ResetTokenGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PasswordResetServiceImpl implements PasswordResetService {
@@ -55,13 +57,15 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                             passwordResetToken.getExpiresAt()
                     )
             );
+
+            log.info("Password reset requested for user with email={}", user.getEmail());
         });
     }
 
     @Override
     public void resetPasswordConfirm(PasswordResetConfirmDto dto) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(dto.token())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
+                .orElseThrow(() -> new InvalidPasswordResetTokenException("Invalid token"));
 
         if (resetToken.isUsed()) {
             throw new InvalidPasswordResetTokenException("Token already used");
@@ -76,5 +80,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
         user.setPassword(passwordEncoder.encode(dto.newPassword()));
         resetToken.setUsed(true);
+
+        log.info("Password reset completed for user with email={}", user.getEmail());
     }
 }
