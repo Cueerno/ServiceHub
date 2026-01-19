@@ -1,5 +1,6 @@
 package com.radiuk.innotter_service.controller;
 
+import com.radiuk.innotter_service.dto.page.BlockPageRequestDto;
 import com.radiuk.innotter_service.dto.page.PageRequestDto;
 import com.radiuk.innotter_service.dto.page.PageResponseDto;
 import com.radiuk.innotter_service.dto.post.PostRequestDto;
@@ -76,8 +77,12 @@ public class PageController {
     }
 
     @PatchMapping("/{id}/block")
-    public ResponseEntity<PageResponseDto> block(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
-        pageService.block(id, jwt);
+    public ResponseEntity<PageResponseDto> block(
+            @PathVariable Long id,
+            @RequestBody BlockPageRequestDto blockPageRequestDto,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        pageService.block(id, jwt, blockPageRequestDto);
         return ResponseEntity.noContent().build();
     }
 

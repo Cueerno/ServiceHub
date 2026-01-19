@@ -60,6 +60,7 @@ public class PageEntity {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "pages_tags",
+            schema = "innotter_service",
             joinColumns = @JoinColumn(name = "page_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )

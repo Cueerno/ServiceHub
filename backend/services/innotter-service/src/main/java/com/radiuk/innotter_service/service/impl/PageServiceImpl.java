@@ -1,5 +1,6 @@
 package com.radiuk.innotter_service.service.impl;
 
+import com.radiuk.innotter_service.dto.page.BlockPageRequestDto;
 import com.radiuk.innotter_service.dto.page.PageRequestDto;
 import com.radiuk.innotter_service.dto.page.PageResponseDto;
 import com.radiuk.innotter_service.dto.post.PostResponseDto;
@@ -20,6 +21,7 @@ import com.radiuk.innotter_service.service.PageManagementService;
 import com.radiuk.innotter_service.service.PageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +39,9 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class PageServiceImpl implements PageService {
+
+    @Value("${page.unblock-default.ttl}")
+    private Duration defaultPageUnblockTtl;
 
     private final PageManagementService pageManagementService;
     private final PageMapper pageMapper;
@@ -155,7 +162,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public void block(Long pageId, Jwt jwt) {
+    public void block(Long pageId, Jwt jwt, BlockPageRequestDto blockPageRequestDto) {
         log.debug("Blocking page: pageId={}, requester={}", pageId, jwt.getSubject());
 
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
@@ -163,6 +170,13 @@ public class PageServiceImpl implements PageService {
         authorizationService.checkAccess(page, jwt);
 
         page.setBlocked(true);
+
+        page.setUnblockDate(
+                blockPageRequestDto.unblockDate() != null
+                        ? blockPageRequestDto.unblockDate()
+                        : Instant.now().plus(defaultPageUnblockTtl)
+        );
+
         log.warn("Page blocked: pageId={}, by={}", pageId, jwt.getSubject());
     }
 
