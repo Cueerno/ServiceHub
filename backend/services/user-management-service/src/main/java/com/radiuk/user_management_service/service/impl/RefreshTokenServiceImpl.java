@@ -44,10 +44,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public User validateAndGetUser(String refreshToken) {
-        RefreshToken token = refreshTokenRepository.findAll().stream()
-                .filter(t -> passwordEncoder.matches(refreshToken, t.getTokenHash()))
-                .findFirst()
+    public User validateAndGetUser(String refreshToken, String jti) {
+        RefreshToken token = refreshTokenRepository.findByJtiAndRevokedFalse(jti)
                 .orElseThrow(() -> new JwtException("Invalid refresh token"));
 
         log.debug("Validating refresh token for user with email{}", token.getUser().getEmail());
