@@ -19,3 +19,6 @@ jwt.secret-base64=
 
 # Actuator
 management.endpoints.web.exposure.include=health, info, metrics
+
+#
+page.unblock-default.ttl=7d
