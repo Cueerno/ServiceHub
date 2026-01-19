@@ -5,6 +5,8 @@ import com.radiuk.user_management_service.entity.PasswordResetToken;
 import com.radiuk.user_management_service.entity.Role;
 import com.radiuk.user_management_service.entity.User;
 import com.radiuk.user_management_service.event.PasswordResetEvent;
+import com.radiuk.user_management_service.exception.ExpiredPasswordResetTokenException;
+import com.radiuk.user_management_service.exception.InvalidPasswordResetTokenException;
 import com.radiuk.user_management_service.exception.UserNotCreatedException;
 import com.radiuk.user_management_service.mapper.UserMapper;
 import com.radiuk.user_management_service.repository.PasswordResetTokenRepository;
@@ -118,11 +120,11 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
 
         if (resetToken.isUsed()) {
-            throw new IllegalStateException("Token already used");
+            throw new InvalidPasswordResetTokenException("Token already used");
         }
 
         if (resetToken.getExpiresAt().isBefore(Instant.now())) {
-            throw new IllegalStateException("Token expired");
+            throw new ExpiredPasswordResetTokenException("Token expired");
         }
 
         User user = userRepository.findById(resetToken.getUserId())
