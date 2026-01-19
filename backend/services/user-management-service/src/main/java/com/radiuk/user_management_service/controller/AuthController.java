@@ -58,7 +58,7 @@ public class AuthController {
 
         addRefreshCookies(response, newRefreshToken, newAccessToken.jti());
 
-        return ResponseEntity.ok(new AuthResponse(newAccessToken, null));
+        return ResponseEntity.ok(new AuthResponse(new JwtWithJti(newAccessToken.jwt(), null), null));
     }
 
     @PostMapping("/logout")
