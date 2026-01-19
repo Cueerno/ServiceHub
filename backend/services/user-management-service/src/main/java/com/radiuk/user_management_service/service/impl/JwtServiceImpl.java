@@ -24,6 +24,8 @@ public class JwtServiceImpl implements JwtService {
 
     @Value("${jwt.expiration}")
     private long tokenExpirySeconds;
+    @Value("${jwt.issuer}")
+    private String issuer;
 
     private final JwtEncoder jwtEncoder;
 
@@ -35,7 +37,7 @@ public class JwtServiceImpl implements JwtService {
         String jti = UUID.randomUUID().toString();
 
         JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
-                .issuer("auth-service")
+                .issuer(issuer)
                 .issuedAt(now)
                 .subject(user.getId().toString())
                 .expiresAt(now.plus(accessTokenTtl))
