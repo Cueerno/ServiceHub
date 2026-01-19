@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "likes")
+@Table(name = "likes", schema = "innotter_service")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

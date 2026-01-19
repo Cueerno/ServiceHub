@@ -11,7 +11,7 @@ import java.time.Instant;
 @Setter
 @Entity
 @Builder
-@Table(name = "password_reset_tokens")
+@Table(name = "password_reset_tokens", schema = "user_management_service")
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)

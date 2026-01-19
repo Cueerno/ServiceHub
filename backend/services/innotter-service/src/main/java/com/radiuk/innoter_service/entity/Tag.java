@@ -11,7 +11,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "tags")
+@Table(name = "tags", schema = "innotter_service")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

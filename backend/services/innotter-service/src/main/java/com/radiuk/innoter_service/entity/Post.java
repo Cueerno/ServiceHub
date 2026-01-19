@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "posts")
+@Table(name = "posts", schema = "innotter_service")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

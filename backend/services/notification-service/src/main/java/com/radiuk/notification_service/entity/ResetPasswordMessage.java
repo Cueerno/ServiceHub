@@ -13,7 +13,7 @@ import java.util.UUID;
 @Entity
 @Builder
 @ToString
-@Table(name = "reset_password_messages")
+@Table(name = "password_reset_messages", schema = "notification_service")
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
