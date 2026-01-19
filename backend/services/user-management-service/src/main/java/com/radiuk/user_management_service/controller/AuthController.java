@@ -61,22 +61,6 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(newAccessToken, null));
     }
 
-    @PostMapping("/password/reset/request")
-    public ResponseEntity<Void> resetPasswordRequest(
-            @RequestBody PasswordResetRequestDto passwordResetRequestDto
-    ) {
-        authService.resetPasswordRequest(passwordResetRequestDto);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/password/reset/confirm")
-    public ResponseEntity<Void> resetPasswordConfirm(
-            @RequestBody PasswordResetConfirmDto passwordResetConfirmDto
-    ) {
-        authService.resetPasswordConfirm(passwordResetConfirmDto);
-        return ResponseEntity.noContent().build();
-    }
-
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
             @AuthenticationPrincipal Jwt jwt,
