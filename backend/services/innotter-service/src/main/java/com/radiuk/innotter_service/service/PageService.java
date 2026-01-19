@@ -1,5 +1,6 @@
 package com.radiuk.innotter_service.service;
 
+import com.radiuk.innotter_service.dto.page.BlockPageRequestDto;
 import com.radiuk.innotter_service.dto.page.PageRequestDto;
 import com.radiuk.innotter_service.dto.page.PageResponseDto;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -20,7 +21,7 @@ public interface PageService {
 
     PageResponseDto unfollow(Long pageId, Jwt jwt);
 
-    void block(Long pageId, Jwt jwt);
+    void block(Long pageId, Jwt jwt, BlockPageRequestDto blockPageRequestDto);
 
     void deletePageById(Long id, Jwt jwt);
 }
