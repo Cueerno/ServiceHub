@@ -4,7 +4,7 @@ import com.radiuk.user_management_service.dto.*;
 import com.radiuk.user_management_service.entity.PasswordResetToken;
 import com.radiuk.user_management_service.entity.Role;
 import com.radiuk.user_management_service.entity.User;
-import com.radiuk.user_management_service.event.ResetPasswordEvent;
+import com.radiuk.user_management_service.event.PasswordResetEvent;
 import com.radiuk.user_management_service.exception.UserNotCreatedException;
 import com.radiuk.user_management_service.mapper.UserMapper;
 import com.radiuk.user_management_service.repository.PasswordResetTokenRepository;
@@ -101,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
             passwordResetTokenRepository.save(passwordResetToken);
 
             applicationEventPublisher.publishEvent(
-                    new ResetPasswordEvent(
+                    new PasswordResetEvent(
                             user.getId(),
                             user.getEmail(),
                             token,

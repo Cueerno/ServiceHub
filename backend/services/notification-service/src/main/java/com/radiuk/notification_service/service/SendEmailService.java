@@ -1,7 +1,7 @@
 package com.radiuk.notification_service.service;
 
-import com.radiuk.notification_service.entity.ResetPasswordMessage;
-import com.radiuk.notification_service.repository.ResetPasswordMessageRepository;
+import com.radiuk.notification_service.entity.PasswordResetMessage;
+import com.radiuk.notification_service.repository.PasswordResetMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,13 +17,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SendEmailService {
 
-    private final ResetPasswordMessageRepository repository;
+    private final PasswordResetMessageRepository repository;
 
     @Scheduled(fixedDelay = 60000)
     public void sendPasswordResetEmail() {
-        List<ResetPasswordMessage> unsendMessages = repository.findBySentAtIsNull();
+        List<PasswordResetMessage> unsendMessages = repository.findBySentAtIsNull();
 
-        for (ResetPasswordMessage message : unsendMessages) {
+        for (PasswordResetMessage message : unsendMessages) {
             log.info("Sending message to reset password email={}",  message.getEmailAddress());
             message.setSentAt(Instant.now());
         }

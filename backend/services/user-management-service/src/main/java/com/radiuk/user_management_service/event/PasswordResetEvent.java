@@ -2,7 +2,7 @@ package com.radiuk.user_management_service.event;
 
 import java.time.Instant;
 
-public record ResetPasswordEvent(
+public record PasswordResetEvent(
 
         Long userId,
         String email,

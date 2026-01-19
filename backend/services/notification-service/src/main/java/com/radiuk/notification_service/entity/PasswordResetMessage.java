@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class ResetPasswordMessage {
+public class PasswordResetMessage {
 
     @Id
     @GeneratedValue
