@@ -1,8 +1,6 @@
 package com.radiuk.user_management_service.handler;
 
-import com.radiuk.user_management_service.exception.UserNotCreatedException;
-import com.radiuk.user_management_service.exception.UserNotFoundException;
-import com.radiuk.user_management_service.exception.UserNotUpdatedException;
+import com.radiuk.user_management_service.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -28,7 +26,9 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.FORBIDDEN, ex.getMessage(), request);
     }
 
-    @ExceptionHandler(JwtException.class)
+    @ExceptionHandler(
+            JwtException.class
+    )
     public ResponseEntity<ErrorResponse> handleJwt(
             JwtException ex,
             HttpServletRequest request
@@ -46,8 +46,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             UserNotCreatedException.class,
-            UserNotUpdatedException.class,
-            IllegalArgumentException.class
+            UserNotUpdatedException.class
     })
     public ResponseEntity<ErrorResponse> handleBadRequest(
             RuntimeException ex,
@@ -55,6 +54,18 @@ public class GlobalExceptionHandler {
     ) {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
+
+    @ExceptionHandler({
+            InvalidPasswordResetTokenException.class,
+            ExpiredPasswordResetTokenException.class
+    })
+    public ResponseEntity<ErrorResponse> handlePasswordResetToken(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(
@@ -92,6 +103,14 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException ex,
+            HttpServletRequest request
+    ) {
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponse> build(
