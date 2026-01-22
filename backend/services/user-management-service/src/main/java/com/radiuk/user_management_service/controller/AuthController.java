@@ -7,6 +7,7 @@ import com.radiuk.user_management_service.service.JwtService;
 import com.radiuk.user_management_service.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -22,11 +23,12 @@ import java.time.Duration;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
+    @Value("${jwt.refresh-token-ttl}")
+    private Duration refreshTokenTtl;
+
     private final AuthService authService;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
-
-    private static final Duration REFRESH_TOKEN_MAX_AGE = Duration.ofDays(7);
 
     @PostMapping("/signup")
     public ResponseEntity<UserResponseDto> register(@RequestBody UserRegistrationDto userRegistrationDto) {
@@ -79,7 +81,7 @@ public class AuthController {
                 .secure(true)
                 .sameSite("Strict")
                 .path("/api/v1/auth/refresh")
-                .maxAge(REFRESH_TOKEN_MAX_AGE)
+                .maxAge(refreshTokenTtl)
                 .build();
 
         ResponseCookie jtiCookie = ResponseCookie.from("refreshJti", jti)
@@ -87,7 +89,7 @@ public class AuthController {
                 .secure(true)
                 .sameSite("Strict")
                 .path("/api/v1/auth/refresh")
-                .maxAge(REFRESH_TOKEN_MAX_AGE)
+                .maxAge(refreshTokenTtl)
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
