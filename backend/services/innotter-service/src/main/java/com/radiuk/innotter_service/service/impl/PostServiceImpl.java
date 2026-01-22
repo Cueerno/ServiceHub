@@ -63,6 +63,10 @@ public class PostServiceImpl implements PostService {
 
         authorizationService.canAccessUser(page, jwt);
 
+        if (postRequestDto.replyTo() != null) {
+            post.setReplyTo(getPostByIdOrThrow(postRequestDto.replyTo()));
+        }
+
         post.setPage(page);
 
         Post savedPost = postRepository.save(post);
@@ -82,6 +86,10 @@ public class PostServiceImpl implements PostService {
         authorizationService.canAccessUser(post.getPage(), jwt);
 
         postMapper.updateFromDto(postRequestDto, post);
+
+        if (postRequestDto.replyTo() != null) {
+            post.setReplyTo(getPostByIdOrThrow(postRequestDto.replyTo()));
+        }
 
         log.info("Post updated: postId={}, requesterId={}", postId, requesterId);
         return postMapper.toDto(post);
