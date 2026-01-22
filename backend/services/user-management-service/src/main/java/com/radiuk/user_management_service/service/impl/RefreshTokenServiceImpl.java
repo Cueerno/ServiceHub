@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -27,6 +28,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private Duration refreshTokenTtl;
 
     @Override
+    @Transactional
     public String createRefreshToken(User user, String jti) {
         log.debug("Creating refresh token for user with email {}", user.getEmail());
 
@@ -45,6 +47,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
+    @Transactional
     public User validateAndGetUser(String refreshToken, String jti) {
         RefreshToken token = refreshTokenRepository.findByJtiAndRevokedFalse(jti)
                 .orElseThrow(() -> new JwtException("Invalid refresh token"));
@@ -67,6 +70,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
+    @Transactional
     public void revokeByJti(String jti) {
         log.debug("Revoke refresh token for user {}", jti);
         refreshTokenRepository.revokeByJti(jti);

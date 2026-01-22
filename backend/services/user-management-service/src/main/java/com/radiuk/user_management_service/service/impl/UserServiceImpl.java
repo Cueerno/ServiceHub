@@ -24,7 +24,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -32,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserResponseDto> getUsersBy(int page, int limit, String filterByName, String sortBy, String orderBy, Jwt jwt) {
         log.debug("Get users with page {} and limit {}, with filter by name {}, with sort by {} and order by {}", page, limit, filterByName, sortBy, orderBy);
 
@@ -50,12 +50,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDto getUserByToken(Jwt jwt) {
         log.debug("Get user with id {}", getUserIdFromToken(jwt));
         return userMapper.toUserResponseDto(getUserByIdOrThrow(getUserIdFromToken(jwt)));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDto getUserById(Jwt jwt, Long userId) {
         log.info("Get user by id: targetUserId={}, requesterId={}", userId, jwt.getSubject());
 
@@ -66,6 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponseDto updateUserByToken(UserUpdateDto dto, Jwt jwt) {
         log.info("Update user with id {}", getUserIdFromToken(jwt));
         User user = getUserByIdOrThrow(getUserIdFromToken(jwt));
@@ -89,11 +92,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUserByToken(Jwt jwt) {
         log.info("Delete user with id {}", getUserIdFromToken(jwt));
         userRepository.deleteById(getUserIdFromToken(jwt));
     }
 
+    @Transactional
     public void deleteUserById(Jwt jwt, Long userId) {
         log.warn(
                 "Delete user request: targetUserId={}, requesterId={}",
