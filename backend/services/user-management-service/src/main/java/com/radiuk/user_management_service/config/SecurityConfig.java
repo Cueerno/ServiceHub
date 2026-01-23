@@ -44,19 +44,17 @@ public class SecurityConfig {
                                 "/api/v1/password/reset/**"
                         ).permitAll()
 
-                                .requestMatchers(
-                                        "/api/v1/auth/**"
-                                ).authenticated()
-
-//                        .requestMatchers(
-//                                "/api/v1/users/{id}"
-//
-//                        ).hasAnyRole("ADMIN", "MODERATOR")
+                        .requestMatchers(
+                                "/api/v1/auth/**"
+                        ).authenticated()
 
                         .requestMatchers(
                                 "/api/v1/users/**"
-
                         ).authenticated()
+
+                        .requestMatchers(
+                                "/api/v1/users/**"
+                        ).hasAnyRole("ADMIN", "MODERATOR")
 
                         .anyRequest().permitAll()
                 )
