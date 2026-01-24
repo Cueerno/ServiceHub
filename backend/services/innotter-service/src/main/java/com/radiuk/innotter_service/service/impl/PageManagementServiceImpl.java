@@ -17,7 +17,7 @@ public class PageManagementServiceImpl implements PageManagementService {
     private final PageRepository pageRepository;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public PageEntity getPageByIdOrThrow(Long pageId) {
         log.debug("Loading page by id={}", pageId);
         return pageRepository.findById(pageId)

@@ -36,7 +36,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PageServiceImpl implements PageService {
 
@@ -81,6 +80,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Long> getPageFollowersByPageId(Long pageId, Jwt jwt) {
         log.debug("Getting page followers: pageId={}, requester={}", pageId, jwt.getSubject());
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);
@@ -98,6 +98,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
+    @Transactional
     public PageResponseDto createPage(PageRequestDto pageRequestDto, Jwt jwt) {
         log.debug("Creating page called by requester={}, name={}", jwt.getSubject(), pageRequestDto.name());
 
@@ -117,6 +118,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
+    @Transactional
     public PageResponseDto updatePage(PageRequestDto dto, Long pageId, Jwt jwt) {
         log.debug("Updating page: pageId={}, requester={}", pageId, jwt.getSubject());
 
@@ -138,6 +140,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
+    @Transactional
     public PageResponseDto follow(Long pageId, Jwt jwt) {
         Long requesterId = getUserIdFromToken(jwt);
         log.debug("User following on the page: pageId={}, requesterId={}", pageId, requesterId);
@@ -151,6 +154,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
+    @Transactional
     public PageResponseDto unfollow(Long pageId, Jwt jwt) {
         Long requesterId = getUserIdFromToken(jwt);
         log.debug("User unfollowing on the page: pageId={}, requesterId={}", pageId, requesterId);
@@ -162,6 +166,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
+    @Transactional
     public void block(Long pageId, Jwt jwt, BlockPageRequestDto blockPageRequestDto) {
         log.debug("Blocking page: pageId={}, requester={}", pageId, jwt.getSubject());
 
@@ -181,6 +186,7 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
+    @Transactional
     public void deletePageById(Long pageId, Jwt jwt) {
         log.debug("Deleting page: pageId={}, requester={}", pageId, jwt.getSubject());
         PageEntity page = pageManagementService.getPageByIdOrThrow(pageId);

@@ -22,7 +22,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
@@ -33,6 +32,7 @@ public class PostServiceImpl implements PostService {
     private final AuthorizationService authorizationService;
 
     @Override
+    @Transactional(readOnly = true)
     public List<PostResponseDto> feed(Jwt jwt) {
         Long requesterId = authorizationService.getUserIdFromToken(jwt);
         log.debug("feed called by userId={}", requesterId);
@@ -53,6 +53,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public PostResponseDto createPost(PostRequestDto postRequestDto, Long pageId, Jwt jwt) {
         Long requesterId = authorizationService.getUserIdFromToken(jwt);
         log.debug("Creating post: pageId={}, requesterId={}", pageId, requesterId);
@@ -62,7 +63,11 @@ public class PostServiceImpl implements PostService {
 
         authorizationService.canAccessUser(page, jwt);
 
-        post.setPage(pageManagementService.getPageByIdOrThrow(pageId));
+        if (postRequestDto.replyTo() != null) {
+            post.setReplyTo(getPostByIdOrThrow(postRequestDto.replyTo().id()));
+        }
+
+        post.setPage(page);
 
         Post savedPost = postRepository.save(post);
 
@@ -71,6 +76,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public PostResponseDto updatePostById(PostRequestDto postRequestDto, Long postId, Jwt jwt) {
         Long requesterId = authorizationService.getUserIdFromToken(jwt);
         log.debug("Updating post: postId={}, requesterId={}", postId, requesterId);
@@ -81,11 +87,16 @@ public class PostServiceImpl implements PostService {
 
         postMapper.updateFromDto(postRequestDto, post);
 
+        if (postRequestDto.replyTo() != null) {
+            post.setReplyTo(getPostByIdOrThrow(postRequestDto.replyTo().id()));
+        }
+
         log.info("Post updated: postId={}, requesterId={}", postId, requesterId);
         return postMapper.toDto(post);
     }
 
     @Override
+    @Transactional
     public void deletePostById(Long postId, Jwt jwt) {
         Long requesterId = authorizationService.getUserIdFromToken(jwt);
         log.debug("Deleting post: postId={}, requesterId={}", postId, requesterId);

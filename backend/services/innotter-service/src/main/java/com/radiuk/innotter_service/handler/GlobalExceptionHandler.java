@@ -44,7 +44,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             PostNotCreatedException.class,
-            PostNotUpdatedException.class,
             PageNotCreatedException.class,
             PageNotUpdatedException.class,
             TagNotCreatedException.class,

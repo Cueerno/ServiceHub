@@ -27,3 +27,26 @@ create table users
 
     group_id     bigint references groups (id)
 );
+
+create table refresh_tokens
+(
+    id         bigserial primary key,
+    token_hash varchar(64) not null,
+    revoked    boolean     not null default false,
+    jti        varchar(36) not null unique,
+    created_at timestamptz not null default now(),
+    expires_at timestamptz not null,
+
+    user_id    bigint      not null references users (id)
+);
+
+create table password_reset_tokens
+(
+    id         bigserial primary key,
+    token      varchar(128) not null unique,
+    expires_at timestamptz  not null,
+    used       boolean      not null default false,
+    created_at timestamptz  not null,
+
+    user_id    bigint       not null references users (id)
+);

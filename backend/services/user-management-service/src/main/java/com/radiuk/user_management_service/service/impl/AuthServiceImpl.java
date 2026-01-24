@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
@@ -31,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
 
     @Override
+    @Transactional
     public UserResponseDto register(UserRegistrationDto userRegistrationDto) {
         log.debug("Registering user with email {}", userRegistrationDto.email());
 
@@ -52,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthResponse authenticate(UserAuthDto dto) {
         log.debug("Authenticating user with login {}", dto.login());
 
@@ -75,6 +76,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void logout(Jwt jwt) {
         log.info("Logout user {}", jwt.getClaim(JwtClaims.EMAIL).toString());
         refreshTokenService.revokeByJti(jwt.getId());

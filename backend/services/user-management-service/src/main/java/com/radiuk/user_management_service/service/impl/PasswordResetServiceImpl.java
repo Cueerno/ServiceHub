@@ -24,7 +24,6 @@ import java.time.Instant;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PasswordResetServiceImpl implements PasswordResetService {
 
@@ -38,6 +37,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private Duration passwordResetTokenTtl;
 
     @Override
+    @Transactional
     public void resetPasswordRequest(PasswordResetRequestDto dto) {
         userRepository.findByEmail(dto.email()).ifPresent(user -> {
             String token = resetTokenGenerator.generate();
@@ -65,6 +65,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     }
 
     @Override
+    @Transactional
     public void resetPasswordConfirm(PasswordResetConfirmDto dto) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(dto.token())
                 .orElseThrow(() -> new InvalidPasswordResetTokenException("Invalid token"));
