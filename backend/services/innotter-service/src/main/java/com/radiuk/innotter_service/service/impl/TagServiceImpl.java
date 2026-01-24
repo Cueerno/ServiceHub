@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class TagServiceImpl implements TagService {
     private final TagMapper tagMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<TagResponseDto> getTagsWithPaginationAndLimitAndFilter(int page, int limit, String filterByName) {
         log.debug("Get tags called: page={}, limit={}, filterByName={}", page, limit, filterByName);
 
@@ -44,6 +46,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional
     public TagResponseDto createTag(TagRequestDto dto) {
         log.debug("Creating tag with name={}", dto.name());
 

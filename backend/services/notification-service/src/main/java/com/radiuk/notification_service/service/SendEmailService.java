@@ -13,12 +13,12 @@ import java.util.List;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class SendEmailService {
 
     private final PasswordResetMessageRepository repository;
 
+    @Transactional
     @Scheduled(fixedDelay = 60000)
     public void sendPasswordResetEmail() {
         List<PasswordResetMessage> unsendMessages = repository.findBySentAtIsNull();
