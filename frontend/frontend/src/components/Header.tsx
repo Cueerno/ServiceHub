@@ -8,6 +8,7 @@ const Header: React.FC = () => {
                 <a href="/" style={{margin: "1rem", color: "white"}}>Home</a>
                 <a href="/signup" style={{margin: "1rem", color: "white"}}>Signup</a>
                 <a href="/login" style={{margin: "1rem", color: "white"}}>Login</a>
+                <a href="/profile" style={{margin: "1rem", color: "white"}}>Profile</a>
             </nav>
         </header>
     );
