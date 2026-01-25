@@ -1,14 +1,34 @@
+import {Link, useNavigate} from "react-router-dom";
+import {useAuth} from "../auth/AuthContext";
 import React from "react";
 
 const Header: React.FC = () => {
+    const {token, logout} = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        await logout();
+        navigate("/login");
+    };
+
     return (
-        <header style={{padding: "1rem", backgroundColor: "#282c34", color: "white"}}>
-            <h1>Welcome</h1>
-            <nav>
-                <a href="/" style={{margin: "1rem", color: "white"}}>Home</a>
-                <a href="/signup" style={{margin: "1rem", color: "white"}}>Signup</a>
-                <a href="/login" style={{margin: "1rem", color: "white"}}>Login</a>
-                <a href="/profile" style={{margin: "1rem", color: "white"}}>Profile</a>
+        <header style={{padding: "10px", borderBottom: "1px solid #ccc"}}>
+            <nav style={{display: "flex", gap: "10px"}}>
+                <Link to="/">Home</Link>
+
+                {!token && (
+                    <>
+                        <Link to="/login">Login</Link>
+                        <Link to="/register">Register</Link>
+                    </>
+                )}
+
+                {token && (
+                    <>
+                        <Link to="/profile">Profile</Link>
+                        <button onClick={handleLogout}>Logout</button>
+                    </>
+                )}
             </nav>
         </header>
     );
