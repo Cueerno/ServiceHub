@@ -1,22 +1,17 @@
-import axios from "axios";
-import { UserAuthDto } from "../dto/UserAuthDto";
-import { UserRegistrationDto } from "../dto/UserRegistrationDto";
-
-const api = axios.create({
-    baseURL: "http://localhost:8080/api/v1/auth",
-    withCredentials: true,
-});
+import {api} from "./api";
+import {UserAuthDto} from "../dto/UserAuthDto";
+import {UserRegistrationDto} from "../dto/UserRegistrationDto";
 
 export const auth = {
     login: (data: UserAuthDto) =>
-        api.post("/login", data),
+        api.post("/api/v1/auth/login", data),
 
     register: (data: UserRegistrationDto) =>
-        api.post("/signup", data),
+        api.post("/api/v1/auth/signup", data),
 
     refresh: () =>
-        api.post("/refresh"),
+        api.post("/api/v1/auth/refresh"),
 
     logout: () =>
-        api.post("/logout"),
-}
+        api.post("/api/v1/auth/logout"),
+};

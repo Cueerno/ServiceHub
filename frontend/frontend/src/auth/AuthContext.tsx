@@ -1,0 +1,34 @@
+import React, { createContext, useContext, useState } from "react";
+
+type AuthContextType = {
+    token: string | null;
+    setToken: (token: string | null) => void;
+};
+
+const AuthContext = createContext<AuthContextType>({
+    token: null,
+    setToken: () => {},
+});
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [token, setTokenState] = useState<string | null>(
+        localStorage.getItem("accessToken")
+    );
+
+    const setToken = (token: string | null) => {
+        if (token) {
+            localStorage.setItem("accessToken", token);
+        } else {
+            localStorage.removeItem("accessToken");
+        }
+        setTokenState(token);
+    };
+
+    return (
+        <AuthContext.Provider value={{ token, setToken }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+export const useAuth = () => useContext(AuthContext);

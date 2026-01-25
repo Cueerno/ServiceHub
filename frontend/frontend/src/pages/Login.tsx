@@ -1,17 +1,22 @@
 import React, {useState} from "react";
 import {auth} from "../api/auth";
+import {useAuth} from "../auth/AuthContext";
+import {useNavigate} from "react-router-dom";
 
 const Login: React.FC = () => {
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
+    const {setToken} = useAuth();
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
             const response = await auth.login({login, password});
-            console.log("ACCESS TOKEN:", response.data.accessToken.jwt);
-            alert("Success");
+            const accessToken = response.data.accessToken.jwt;
+            setToken(accessToken);
+            navigate("/");
         } catch (error) {
             alert("Authentication error");
         }
@@ -19,7 +24,7 @@ const Login: React.FC = () => {
 
     return (
         <>
-            <h2>Вход</h2>
+            <h2>Login</h2>
             <form onSubmit={handleSubmit}>
                 <input
                     placeholder="Username or email"
@@ -34,7 +39,7 @@ const Login: React.FC = () => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
                 <br/>
-                <button type="submit">Войти</button>
+                <button type="submit">Login</button>
             </form>
         </>
     );
