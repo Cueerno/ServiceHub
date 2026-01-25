@@ -1,5 +1,6 @@
-import React, {createContext, useContext, useState} from "react";
+import React, {createContext, useContext, useEffect, useState} from "react";
 import {auth} from "../api/auth";
+import {setupInterceptors} from "../api/interceptors";
 
 interface AuthContextType {
     token: string | null;
@@ -26,12 +27,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
     const logout = async () => {
         try {
             await auth.logout();
-        } catch (e) {
-            console.warn("Logout request failed, clearing local state anyway");
         } finally {
             setToken(null);
         }
     };
+
+    useEffect(() => {
+        setupInterceptors(
+            () => token,
+            setToken,
+            logout
+        );
+    }, [token]);
 
     return (
         <AuthContext.Provider value={{token, setToken, logout}}>
@@ -41,9 +48,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
+    const ctx = useContext(AuthContext);
+    if (!ctx) {
         throw new Error("useAuth must be used within AuthProvider");
     }
-    return context;
+    return ctx;
 };
