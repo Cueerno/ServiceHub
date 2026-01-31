@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.radiuk.user_management_service.dto.RefreshTokenCache;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -54,7 +53,7 @@ public class RedisConfig {
                         );
 
 
-        Jackson2JsonRedisSerializer<RefreshTokenCache> refreshToken = new Jackson2JsonRedisSerializer<>(RefreshTokenCache.class);
+        Jackson2JsonRedisSerializer<String> refreshToken = new Jackson2JsonRedisSerializer<>(String.class);
         refreshToken.setObjectMapper(objectMapper);
 
         Map<String, RedisCacheConfiguration> configs = Map.of(
