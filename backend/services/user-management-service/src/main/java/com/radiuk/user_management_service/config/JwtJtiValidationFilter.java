@@ -1,6 +1,6 @@
 package com.radiuk.user_management_service.config;
 
-import com.radiuk.user_management_service.repository.RefreshTokenRepository;
+import com.radiuk.user_management_service.service.RefreshTokenQueryService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +18,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtJtiValidationFilter extends OncePerRequestFilter {
 
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenQueryService refreshTokenQueryService;
 
     @Override
     protected void doFilterInternal(
@@ -32,9 +32,7 @@ public class JwtJtiValidationFilter extends OncePerRequestFilter {
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
             String jti = jwt.getId();
 
-            boolean ok = refreshTokenRepository.findByJtiAndRevokedFalse(jti).isPresent();
-
-            if (!ok) {
+            if (refreshTokenQueryService.getByJtiAndRevokedFalse(jti).isEmpty()) {
                 SecurityContextHolder.clearContext();
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
                 return;
