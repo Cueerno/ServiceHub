@@ -7,6 +7,8 @@ import com.radiuk.user_management_service.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
@@ -21,14 +23,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
-    private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenRepository refreshTokenRepository;
-
     @Value("${jwt.refresh-token-ttl}")
     private Duration refreshTokenTtl;
 
+    private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
+
     @Override
     @Transactional
+    @CachePut(key = "#jti", value = "refreshToken")
     public String createRefreshToken(User user, String jti) {
         log.debug("Creating refresh token for user with email {}", user.getEmail());
 
@@ -71,6 +74,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     @Transactional
+    @CacheEvict(key = "#jti", value = "refreshToken")
     public void revokeByJti(String jti) {
         log.debug("Revoke refresh token for user {}", jti);
         refreshTokenRepository.revokeByJti(jti);
