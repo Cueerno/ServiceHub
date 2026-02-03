@@ -26,6 +26,9 @@ public class AuthController {
     @Value("${jwt.refresh-token-ttl}")
     private Duration refreshTokenTtl;
 
+    private final static String REFRESH_JTI_COOKIE = "refreshJti";
+    private final static String REFRESH_TOKEN_COOKIE = "refreshToken";
+
     private final AuthService authService;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
@@ -49,9 +52,9 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(
-            @CookieValue("refreshToken") String refreshToken,
-            @CookieValue("refreshJti") String jti,
-            HttpServletResponse response
+            HttpServletResponse response,
+            @CookieValue(REFRESH_JTI_COOKIE) String jti,
+            @CookieValue(REFRESH_TOKEN_COOKIE) String refreshToken
     ) {
         User user = refreshTokenService.validateAndGetUser(refreshToken, jti);
 
@@ -76,7 +79,7 @@ public class AuthController {
     }
 
     private void addRefreshCookies(HttpServletResponse response, String refreshToken, String jti) {
-        ResponseCookie tokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+        ResponseCookie tokenCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, refreshToken)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")
@@ -84,7 +87,7 @@ public class AuthController {
                 .maxAge(refreshTokenTtl)
                 .build();
 
-        ResponseCookie jtiCookie = ResponseCookie.from("refreshJti", jti)
+        ResponseCookie jtiCookie = ResponseCookie.from(REFRESH_JTI_COOKIE, jti)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")
@@ -97,14 +100,14 @@ public class AuthController {
     }
 
     private void deleteRefreshCookies(HttpServletResponse response) {
-        ResponseCookie tokenCookie = ResponseCookie.from("refreshToken", "")
+        ResponseCookie tokenCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
                 .httpOnly(true)
                 .secure(true)
                 .path("/api/v1/auth/refresh")
                 .maxAge(0)
                 .build();
 
-        ResponseCookie jtiCookie = ResponseCookie.from("refreshJti", "")
+        ResponseCookie jtiCookie = ResponseCookie.from(REFRESH_JTI_COOKIE, "")
                 .httpOnly(true)
                 .secure(true)
                 .path("/api/v1/auth/refresh")
