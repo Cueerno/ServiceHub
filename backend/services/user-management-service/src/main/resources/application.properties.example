@@ -14,6 +14,11 @@ spring.jpa.properties.hibernate.show_sql=true
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.hibernate.ddl-auto=validate
 
+# Redis
+spring.cache.type=redis
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+
 # Flyway
 spring.flyway.user=
 spring.flyway.password=
