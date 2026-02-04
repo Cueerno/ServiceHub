@@ -32,7 +32,7 @@ public class JwtJtiValidationFilter extends OncePerRequestFilter {
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
             String jti = jwt.getId();
 
-            if (refreshTokenQueryService.getByJtiAndRevokedFalse(jti).isEmpty()) {
+            if (!refreshTokenQueryService.isJtiValid(jti)) {
                 SecurityContextHolder.clearContext();
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
                 return;
