@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.radiuk.user_management_service.util.RedisConfigNames;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -35,29 +36,15 @@ public class RedisConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory factory, ObjectMapper objectMapper) {
-        RedisCacheConfiguration baseConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .disableCachingNullValues()
-                .serializeKeysWith(
-                        RedisSerializationContext
-                                .SerializationPair
-                                .fromSerializer(new StringRedisSerializer())
-                );
+        RedisCacheConfiguration baseConfig = createBaseConfig();
 
-        Function<CacheConfigEntry, RedisCacheConfiguration> createConfig =
-                entry -> baseConfig
-                        .entryTtl(entry.ttl)
-                        .serializeValuesWith(
-                                RedisSerializationContext
-                                        .SerializationPair
-                                        .fromSerializer(entry.valueSerializer)
-                        );
+        Function<CacheConfigEntry, RedisCacheConfiguration> createConfig = createConfig(baseConfig);
 
-
-        Jackson2JsonRedisSerializer<String> refreshToken = new Jackson2JsonRedisSerializer<>(String.class);
-        refreshToken.setObjectMapper(objectMapper);
+        Jackson2JsonRedisSerializer<Boolean> booleanSerializer = new Jackson2JsonRedisSerializer<>(Boolean.class);
+        booleanSerializer.setObjectMapper(objectMapper);
 
         Map<String, RedisCacheConfiguration> configs = Map.of(
-                "refreshToken", createConfig.apply(new CacheConfigEntry(refreshTokenTtl, refreshToken))
+                RedisConfigNames.VALID_REFRESH_JTI, createConfig.apply(new CacheConfigEntry(refreshTokenTtl, booleanSerializer))
         );
 
         return RedisCacheManager.builder(factory)
@@ -65,6 +52,25 @@ public class RedisConfig {
                 .withInitialCacheConfigurations(configs)
                 .transactionAware()
                 .build();
+    }
+
+    private RedisCacheConfiguration createBaseConfig() {
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .disableCachingNullValues()
+                .serializeKeysWith(
+                        RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(new StringRedisSerializer())
+                );
+    }
+    private Function<CacheConfigEntry, RedisCacheConfiguration> createConfig(RedisCacheConfiguration baseConfig) {
+        return entry -> baseConfig
+                .entryTtl(entry.ttl)
+                .serializeValuesWith(
+                        RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(entry.valueSerializer)
+                );
     }
 
     private record CacheConfigEntry(
