@@ -1,6 +1,6 @@
 spring.application.name=user-management-service
 
-server.port=8080
+server.port=8081
 
 # Data Source
 spring.datasource.driver-class-name=org.postgresql.Driver
