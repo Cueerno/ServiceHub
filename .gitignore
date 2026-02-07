@@ -9,4 +9,6 @@ gen
 
 # Spring Boot
 *.properties
+*.yml
 !application.properties.example
+!application.yml.example
