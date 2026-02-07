@@ -1,12 +1,11 @@
 package com.radiuk.user_management_service.config;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,24 +15,19 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
 @Configuration
-@EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     @Value("${jwt.secret-base64}")
     private String secretBase64;
 
-    private final JwtJtiValidationFilter jwtJtiValidationFilter;
-
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    SecurityFilterChain filterChain(HttpSecurity http) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
@@ -49,35 +43,33 @@ public class SecurityConfig {
                         ).authenticated()
 
                         .requestMatchers(
-                                "/api/v1/users/**"
+                                "/api/v1/users/{id}"
                         ).authenticated()
 
                         .requestMatchers(
                                 "/api/v1/users/**"
                         ).hasAnyRole("ADMIN", "MODERATOR")
 
-                        .anyRequest().permitAll()
+                        .anyRequest().denyAll()
                 )
 
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         )
-                )
-
-                .addFilterAfter(jwtJtiValidationFilter, BearerTokenAuthenticationFilter.class);
+                );
 
         return http.build();
-    }
-
-    private SecretKeySpec secretKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(secretBase64);
-        return new SecretKeySpec(keyBytes, "HmacSHA256");
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    private SecretKeySpec secretKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(secretBase64);
+        return new SecretKeySpec(keyBytes, "HmacSHA256");
     }
 
     @Bean
