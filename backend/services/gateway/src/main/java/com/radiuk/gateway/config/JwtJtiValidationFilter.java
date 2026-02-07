@@ -1,6 +1,7 @@
 package com.radiuk.gateway.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -15,7 +16,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class JwtJtiValidationFilter implements WebFilter {
 
-    private static final String PREFIX = "refresh:jti:";
+    @Value("${redis.cache.prefix}")
+    private String redisCachePrefix;
+
     private final ReactiveStringRedisTemplate redisTemplate;
 
     @Override
@@ -33,7 +36,7 @@ public class JwtJtiValidationFilter implements WebFilter {
                             return exchange.getResponse().setComplete();
                         }
 
-                        return redisTemplate.hasKey(PREFIX + jti)
+                        return redisTemplate.hasKey(redisCachePrefix + jti)
                                 .flatMap(exists -> {
                                     if (Boolean.FALSE.equals(exists)) {
                                         exchange.getResponse()
