@@ -26,5 +26,8 @@ spring.flyway.default-schema=innotter_service
 # Actuator
 management.endpoints.web.exposure.include=health, info, metrics
 
+# Jwt
+jwt.secret-base64=
+
 #
 page.unblock-default.ttl=7d
