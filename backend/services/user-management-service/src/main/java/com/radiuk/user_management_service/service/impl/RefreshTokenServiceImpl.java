@@ -7,7 +7,7 @@ import com.radiuk.user_management_service.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Value("${jwt.refresh-token-ttl}")
     private Duration refreshTokenTtl;
 
+    @Value("${redis.cache.prefix}")
+    private String redisCachePrefix;
+
     private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate redisTemplate;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
@@ -42,6 +46,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshToken.setExpiresAt(Instant.now().plus(refreshTokenTtl));
 
         refreshTokenRepository.save(refreshToken);
+
+        redisTemplate.opsForValue().set(
+                redisCachePrefix + jti,
+                "1",
+                refreshTokenTtl
+        );
 
         log.info("Created refresh token for user with email {}", user.getEmail());
         return rawToken;
@@ -72,9 +82,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     @Transactional
-    @CacheEvict(key = "#jti", value = "validRefreshJti")
     public void revokeByJti(String jti) {
         log.debug("Revoke refresh token for user {}", jti);
         refreshTokenRepository.revokeByJti(jti);
+        redisTemplate.delete(redisCachePrefix + jti);
     }
 }
