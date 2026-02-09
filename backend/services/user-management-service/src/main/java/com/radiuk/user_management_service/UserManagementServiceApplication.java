@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @EnableScheduling
 @EnableJpaAuditing
+@EnableDiscoveryClient
 @SpringBootApplication
 public class UserManagementServiceApplication {
 
