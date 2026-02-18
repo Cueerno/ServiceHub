@@ -1,5 +1,6 @@
 package com.radiuk.notification_service.listener;
 
+import com.radiuk.notification_service.entity.EmailStatus;
 import com.radiuk.notification_service.entity.PasswordResetMessage;
 import com.radiuk.notification_service.event.PasswordResetEvent;
 import com.radiuk.notification_service.repository.PasswordResetMessageRepository;
@@ -25,23 +26,12 @@ public class PasswordResetListener {
         PasswordResetMessage message = PasswordResetMessage.builder()
                 .userId(event.userId())
                 .emailAddress(event.email())
-                .subject("Password reset")
-                .body(buildBody(event))
+                .status(EmailStatus.PENDING)
+                .token(event.token())
                 .build();
 
         resetPasswordRepository.save(message);
 
         log.info("Password reset email saved, email={}", event.email());
-    }
-
-    private String buildBody(PasswordResetEvent event) {
-        String link = "https://frontend.app/reset-password?token=" + event.token();
-
-        return String.format("""
-                To: %s
-                Reset your password:
-                %s
-                Expires at: %s
-                %n""", event.email(), link, event.expiresAt());
     }
 }
