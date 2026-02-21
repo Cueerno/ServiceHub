@@ -49,6 +49,13 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    public List<UserResponseDto> getUsersByIds(List<Long> ids) {
+        return userRepository.findAllById(ids)
+                .stream()
+                .map(userMapper::toUserResponseDto)
+                .toList();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public UserResponseDto getUserByToken(Jwt jwt) {

@@ -31,6 +31,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsersBy(page, limit, filterByName, sortBy, orderBy, jwt));
     }
 
+    @PostMapping("/ids")
+    public ResponseEntity<List<UserResponseDto>> getUsersByIds(@RequestBody List<Long> ids) {
+        return ResponseEntity.ok(userService.getUsersByIds(ids));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getUserByToken(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(userService.getUserByToken(jwt));
