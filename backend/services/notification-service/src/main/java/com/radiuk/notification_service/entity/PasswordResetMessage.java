@@ -30,11 +30,15 @@ public class PasswordResetMessage {
     @Column(nullable = false, length = 100)
     private String emailAddress;
 
-    @Column(nullable = false)
-    private String subject;
+    @Enumerated(EnumType.STRING)
+    private EmailStatus status;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String body;
+    @Column(nullable = false)
+    private String token;
+
+    private Integer attemptCount;
+
+    private Instant lastAttemptAt;
 
     @CreatedDate
     @Column(nullable = false)

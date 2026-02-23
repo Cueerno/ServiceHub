@@ -10,6 +10,8 @@ public interface UserService {
 
     List<UserResponseDto> getUsersBy(int page, int limit, String filterByName, String sortBy, String orderBy, Jwt jwt);
 
+    List<UserResponseDto> getUsersByIds(List<Long> ids);
+
     UserResponseDto getUserByToken(Jwt jwt);
 
     UserResponseDto getUserById(Jwt jwt, Long userId);
