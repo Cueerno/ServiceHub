@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @EnableJpaAuditing
+@EnableDiscoveryClient
 @SpringBootApplication
 public class InnotterServiceApplication {
 
